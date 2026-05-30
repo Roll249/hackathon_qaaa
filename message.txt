@@ -1,0 +1,179 @@
+# Đề xuất hướng nghiên cứu
+
+## Tăng cường dữ liệu lượng tử cho dự báo dịch sốt xuất huyết tại Đông Nam Á bằng mô hình Spatio-Temporal Point Process
+
+### 1. Bối cảnh
+
+Sốt xuất huyết (Dengue Fever) là một trong những bệnh truyền nhiễm phổ biến nhất tại khu vực Đông Nam Á. Các quốc gia như Việt Nam, Thái Lan, Indonesia, Malaysia và Philippines thường xuyên ghi nhận các đợt bùng phát dịch với quy mô lớn, gây áp lực đáng kể lên hệ thống y tế và công tác phòng chống dịch.
+
+Trong những năm gần đây, các mô hình Spatio-Temporal Point Process (STPP) được sử dụng rộng rãi để mô hình hóa sự xuất hiện và lan truyền của các ca bệnh theo không gian và thời gian. Thay vì chỉ dự đoán số ca mắc, STPP cho phép mô tả chính xác vị trí và thời điểm xuất hiện của từng sự kiện dịch tễ.
+
+Tuy nhiên, một trong những hạn chế lớn nhất của các mô hình dự báo dịch bệnh là sự thiếu hụt dữ liệu. Mặc dù các quốc gia có công bố dữ liệu dịch tễ, số lượng sự kiện thực tế vẫn tương đối hạn chế so với yêu cầu của các mô hình học sâu hiện đại. Điều này dẫn đến hiện tượng overfitting, giảm khả năng tổng quát hóa và làm suy giảm độ chính xác của mô hình dự báo.
+
+---
+
+### 2. Vấn đề nghiên cứu
+
+Trong seminar "Statistical Learning for Spatio-Temporal Point Processes", tác giả đề xuất phương pháp SOP (Second-Order Preserving Permutations) nhằm tạo thêm dữ liệu huấn luyện bằng cách hoán đổi các mốc thời gian trong chuỗi sự kiện nhưng vẫn bảo toàn các đặc trưng thống kê bậc hai như hàm K và hàm L.
+
+Mặc dù SOP cho kết quả khả quan, phương pháp này vẫn tồn tại một số hạn chế:
+
+* Không gian các mẫu sinh ra còn hạn chế.
+* Quá trình hoán vị mang tính thủ công và phụ thuộc vào các quy tắc được thiết kế trước.
+* Khó mở rộng khi kích thước dữ liệu tăng lên.
+* Chưa khai thác được toàn bộ không gian cấu hình khả thi của quá trình điểm.
+
+Do đó, cần một phương pháp tăng cường dữ liệu linh hoạt hơn, có khả năng tạo ra nhiều kịch bản dịch bệnh đa dạng nhưng vẫn bảo toàn cấu trúc không-thời gian của dữ liệu gốc.
+
+---
+
+### 3. Ý tưởng đề xuất
+
+Nghiên cứu này đề xuất sử dụng các mô hình sinh lượng tử (Quantum Generative Models) để thay thế cho phương pháp SOP truyền thống.
+
+Ý tưởng chính là xây dựng một bộ sinh dữ liệu lượng tử có khả năng tạo ra các chuỗi sự kiện dịch sốt xuất huyết mới dựa trên dữ liệu thực tế.
+
+Thay vì thực hiện các phép hoán vị thủ công trên dữ liệu, hệ thống sẽ học phân phối xác suất của quá trình phát sinh dịch bệnh, sau đó sinh ra các kịch bản dịch tễ mới có đặc tính tương tự dữ liệu gốc.
+
+Các mô hình có thể được xem xét bao gồm:
+
+* Quantum Generative Adversarial Network (QGAN)
+* Quantum Born Machine (QBM)
+* Variational Quantum Circuit Generator (VQC Generator)
+
+---
+
+### 4. Dữ liệu dự kiến
+
+Nguồn dữ liệu dự kiến:
+
+* WHO Dengue Surveillance Data
+* ASEAN Dengue Dashboard
+* Bộ Y tế Việt Nam
+* Bộ Y tế Thái Lan
+* Bộ Y tế Indonesia
+* Kaggle Dengue Datasets
+* Open Disease Surveillance Data
+
+Mỗi bản ghi sẽ được chuẩn hóa dưới dạng:
+
+Event = (Latitude, Longitude, Timestamp, Case Count)
+
+Ví dụ:
+
+* Vị trí ca bệnh
+* Thời điểm ghi nhận
+* Mức độ bùng phát
+
+Dữ liệu sau đó sẽ được chuyển thành dạng Spatio-Temporal Point Process để phục vụ huấn luyện.
+
+---
+
+### 5. Quy trình nghiên cứu đề xuất
+
+#### Giai đoạn 1: Thu thập dữ liệu
+
+Thu thập dữ liệu sốt xuất huyết từ các quốc gia Đông Nam Á trong giai đoạn nhiều năm.
+
+Tiền xử lý:
+
+* Loại bỏ dữ liệu nhiễu.
+* Chuẩn hóa tọa độ.
+* Chuẩn hóa thời gian.
+* Chia thành các cửa sổ không gian và thời gian.
+
+---
+
+#### Giai đoạn 2: Xây dựng mô hình cơ sở
+
+Sử dụng các mô hình dự báo hiện có:
+
+* CNN-LSTM
+* Hawkes Process
+* Neural Spatio-Temporal Point Process
+
+Đây sẽ là baseline cho nghiên cứu.
+
+---
+
+#### Giai đoạn 3: Tăng cường dữ liệu bằng SOP
+
+Triển khai SOP theo phương pháp trong seminar.
+
+Mục tiêu:
+
+* Sinh thêm dữ liệu.
+* Đánh giá khả năng cải thiện độ chính xác dự báo.
+
+Đây sẽ là baseline augmentation.
+
+---
+
+#### Giai đoạn 4: Tăng cường dữ liệu lượng tử
+
+Pipeline đề xuất:
+
+Dữ liệu dịch sốt xuất huyết
+↓
+Quantum Encoding
+↓
+Quantum Generator
+↓
+Sinh dữ liệu giả lập
+↓
+Kiểm định thống kê
+↓
+Bổ sung vào tập huấn luyện
+
+Mục tiêu:
+
+* Tạo nhiều kịch bản bùng phát dịch bệnh khác nhau.
+* Bảo toàn cấu trúc không gian và thời gian.
+* Tăng độ đa dạng của dữ liệu.
+
+---
+
+#### Giai đoạn 5: Đánh giá
+
+So sánh:
+
+1. Không augmentation
+2. SOP augmentation
+3. Quantum augmentation
+
+Thông qua các tiêu chí:
+
+* RMSE
+* MAE
+* Precision
+* Recall
+* F1-score
+
+Đồng thời đánh giá:
+
+* Độ tương đồng hàm K
+* Độ tương đồng hàm L
+* Pair Correlation Function
+* Spatial Density Distribution
+
+---
+
+### 6. Đóng góp kỳ vọng
+
+#### Đóng góp học thuật
+
+* Đề xuất một hướng tiếp cận mới cho bài toán tăng cường dữ liệu trong Spatio-Temporal Point Process.
+* Kết hợp Quantum Machine Learning với mô hình dịch tễ học.
+* So sánh trực tiếp giữa SOP và các mô hình sinh lượng tử.
+
+#### Đóng góp thực tiễn
+
+* Cải thiện khả năng dự báo dịch sốt xuất huyết.
+* Hỗ trợ công tác phòng chống dịch tại Đông Nam Á.
+* Tạo nền tảng cho việc áp dụng Quantum Machine Learning trong lĩnh vực y tế công cộng.
+
+---
+
+### 7. Câu hỏi nghiên cứu
+
+"Liệu các mô hình sinh lượng tử có thể tạo ra dữ liệu dịch sốt xuất huyết đa dạng và sát với phân phối thực tế hơn các phương pháp tăng cường dữ liệu cổ điển, từ đó cải thiện độ chính xác của các mô hình dự báo dịch bệnh hay không?"

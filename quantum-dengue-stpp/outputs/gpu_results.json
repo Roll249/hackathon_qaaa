@@ -1,0 +1,88 @@
+{
+  "pipeline": "GPU-Accelerated (RTX 3090)",
+  "config": {
+    "grid_size": 48,
+    "seq_len": 12,
+    "batch_size": 128,
+    "epochs": 80,
+    "lr": 0.0003,
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "vram_gb": 24.0,
+    "mixed_precision": true
+  },
+  "validation_results": {
+    "cnn_lstm_no_aug": {
+      "RMSE": 2.1992485523223877,
+      "MAE": 0.6283137798309326,
+      "MAPE": 155.4337158203125,
+      "R2": 0.4298572540283203,
+      "Pearson_r": 0.7341486811637878,
+      "Spearman_r": 0.9087968120132689
+    },
+    "transformer_no_aug": {
+      "RMSE": 1.365208387374878,
+      "MAE": 0.4099135100841522,
+      "MAPE": 113.96559143066406,
+      "R2": 0.7802985906600952,
+      "Pearson_r": 0.8870092034339905,
+      "Spearman_r": 0.909090653127276
+    },
+    "attn_lstm_no_aug": {
+      "RMSE": 2.5384955406188965,
+      "MAE": 0.7175527811050415,
+      "MAPE": 191.9917449951172,
+      "R2": 0.2403949499130249,
+      "Pearson_r": 0.5303632616996765,
+      "Spearman_r": 0.6942017062225538
+    },
+    "cnn_lstm_sop": {
+      "RMSE": 2.266824722290039,
+      "MAE": 0.6115995049476624,
+      "MAPE": 135.2888641357422,
+      "R2": 0.3942815065383911,
+      "Pearson_r": 0.72763991355896,
+      "Spearman_r": 0.7103653468738776
+    },
+    "cnn_lstm_quantum": {
+      "RMSE": 2.2835006713867188,
+      "MAE": 0.5861797332763672,
+      "MAPE": 124.07945251464844,
+      "R2": 0.3853367567062378,
+      "Pearson_r": 0.7375622987747192,
+      "Spearman_r": 0.7021655613006967
+    },
+    "cnn_lstm_grid_qgan_v3": {
+      "RMSE": 2.3631839752197266,
+      "MAE": 0.6569910645484924,
+      "MAPE": 152.5305938720703,
+      "R2": 0.34169065952301025,
+      "Pearson_r": 0.6814112067222595,
+      "Spearman_r": 0.6992105204433781
+    }
+  },
+  "quantum_training": {
+    "qgan_v3_success": true,
+    "qgan_v3_metrics": {
+      "qbm_v3_final_loss": 9.095623884387608e-08,
+      "grid_qgan_val_rmse": 2.3631839752197266,
+      "grid_qgan_val_r2": 0.34169065952301025
+    },
+    "n_grid_qgan_synthetic": 25669,
+    "grid_qgan_g_loss_final": 256.089616394043,
+    "grid_qgan_d_loss_final": 0.799994432926178
+  },
+  "dataset": {
+    "n_train": 37390,
+    "n_val": 8012,
+    "n_test": 8013,
+    "n_total": 53415,
+    "total_cases": 3933704,
+    "n_countries": 8,
+    "n_regions": 223
+  },
+  "timing": {
+    "total_seconds": 379.7,
+    "total_minutes": 6.3
+  }
+}

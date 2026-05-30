@@ -1,0 +1,100 @@
+dengue_data:
+  raw_path: "../dengue_dataset"
+  processed_path: "data/processed"
+  synthetic_path: "data/synthetic"
+
+  countries:
+    - Cambodia
+    - Indonesia
+    - Laos
+    - Malaysia
+    - Singapore
+    - Thailand
+    - Timor-Leste
+    - Vietnam
+
+  spatial_resolution: "admin1"  # admin1 = province-level
+  temporal_resolution: "month"  # monthly aggregates
+
+preprocessing:
+  min_cases: 0  # include all records
+  remove_zeros_threshold: 0.8  # remove regions with >80% zeros
+  outlier_method: "iqr"
+  outlier_multiplier: 3.0
+  train_split: 0.70
+  val_split: 0.15
+  test_split: 0.15
+  temporal_split: true  # chronological split, no shuffle
+
+spatial:
+  grid_size: 16  # for CNN input
+  coordinate_source: "geocode"  # geocode or approximate
+  countries_geojson: "data/raw/sea_countries.geojson"
+
+augmentation:
+  sop:
+    enabled: true
+    augmentation_ratios: [1, 2, 5]
+    k_function_bins: 20
+    k_function_max_radius: 5.0  # degrees
+    permutation_window_months: 3
+    preserve_k_function: true
+    preserve_l_function: true
+    preserve_pair_correlation: true
+
+  quantum:
+    enabled: true
+    model: "qgan"  # qbm, qgan, or hybrid
+    n_qubits: 8
+    circuit_depth: 4
+    n_shots: 10000
+    batch_size: 32
+    epochs: 500
+    lr: 0.001
+    latent_dim: 16
+    augmentation_ratio: 3  # generate 3x more
+    encoding: "amplitude"  # amplitude, basis, or angle
+    backend: "pennylane.lightning.cpu"  # or qiskit.aer
+    use_gradient_clipping: true
+    gradient_clip_value: 1.0
+
+models:
+  hawkes:
+    lr: 0.01
+    max_iter: 1000
+    spatial_decay_gamma: 0.1  # km^-1
+    temporal_decay_beta: 0.5  # months^-1
+    initialization: "mle"
+
+  cnn_lstm:
+    lr: 0.001
+    epochs: 100
+    batch_size: 32
+    conv_channels: [32, 64]
+    lstm_hidden: 64
+    lstm_layers: 2
+    dropout: 0.3
+    early_stopping_patience: 10
+
+  nest:
+    lr: 0.001
+    epochs: 100
+    batch_size: 32
+    n_gaussian_components: 10
+    history_length: 50  # number of events to condition on
+    hidden_dim: 64
+
+evaluation:
+  metrics:
+    - RMSE
+    - MAE
+    - MAPE
+    - R2
+    - F1
+    - Precision
+    - Recall
+  k_function:
+    n_permutations: 99  # for confidence intervals
+    radii: [0.5, 1.0, 2.0, 5.0]  # degrees
+  n_trials_optuna: 50
+  random_seed: 42
