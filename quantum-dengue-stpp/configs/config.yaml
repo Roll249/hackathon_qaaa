@@ -27,7 +27,7 @@ preprocessing:
   temporal_split: true  # chronological split, no shuffle
 
 spatial:
-  grid_size: 16  # for CNN input
+  grid_size: 32  # Optimized: 32x32 for better spatial resolution (was 16)
   coordinate_source: "geocode"  # geocode or approximate
   countries_geojson: "data/raw/sea_countries.geojson"
 
