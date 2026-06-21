@@ -27,3 +27,12 @@ prophet>=1.1
 
 # Optimization
 optuna>=4.0
+
+# API & Web
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.9
+
+# Testing
+pytest>=9.0
+pytest-cov>=6.0
