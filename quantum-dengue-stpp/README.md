@@ -8,9 +8,7 @@ This project investigates whether quantum generative models can produce more div
 
 ---
 
-## Key Improvements (v2)
-
-### Production-Ready Features
+## Production-Ready Features (v3)
 
 | Feature | Status | Description |
 |---------|--------|-------------|
@@ -18,9 +16,14 @@ This project investigates whether quantum generative models can produce more div
 | **Adaptive Spatial Gridding** | ✅ | Country-specific normalization for quantum embedding |
 | **Softplus Output Activation** | ✅ | Ensures non-negative predictions for count data |
 | **Unit Tests** | ✅ | 29 pytest tests, all passing |
-| **Logging System** | ✅ | Structured logging with TrainingLogger, DataLogger, QuantumLogger |
+| **Logging System** | ✅ | TrainingLogger, DataLogger, QuantumLogger |
 | **Model Serialization** | ✅ | torch.save/load with metadata |
-| **FastAPI Endpoints** | ✅ | REST API for predictions |
+| **Experiment Tracking** | ✅ | Lightweight MLflow-style tracking |
+| **FastAPI Endpoints** | ✅ | REST API with /metrics, /health |
+| **CI/CD Pipeline** | ✅ | GitHub Actions with 7 jobs |
+| **Docker Support** | ✅ | Multi-stage Dockerfile + Compose |
+| **Deployment Scripts** | ✅ | Automated deploy/backup scripts |
+| **Security Hardening** | ✅ | Rate limiting, API keys, headers |
 
 ---
 
@@ -127,6 +130,9 @@ python -m src.api.endpoints
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
   -d '{"location": {"latitude": 10.8, "longitude": 106.7}, "forecast_horizon": 3}'
+
+# Docker deployment
+docker-compose up -d
 ```
 
 ---
@@ -161,15 +167,19 @@ curl -X POST http://localhost:8000/predict \
 ```
 quantum-dengue-stpp/
 ├── src/
-│   ├── api/              # FastAPI endpoints
+│   ├── api/              # FastAPI endpoints + metrics
 │   ├── augmentation/     # Quantum augmentation (QBM, QGAN, Local PQC)
 │   ├── data/            # Data loading with leakage prevention
 │   ├── evaluation/      # Metrics (forecasting + point process)
-│   ├── models/         # CNN-LSTM, NEST, Hawkes, ZINB
-│   └── utils/           # Logging, serialization
+│   ├── models/          # CNN-LSTM, NEST, Hawkes, ZINB
+│   └── utils/           # Logging, serialization, security, tracking
 ├── tests/               # pytest unit tests (29 tests)
-├── dengue_dataset/      # Data processing scripts
+├── scripts/             # Deployment scripts
+├── .github/workflows/   # CI/CD pipeline
+├── dengue_dataset/       # Data processing scripts
 ├── output_result/       # Results and visualizations
+├── Dockerfile           # Multi-stage Docker build
+├── docker-compose.yml   # Full stack deployment
 └── run_gpu_pipeline.py  # Main pipeline
 ```
 
@@ -180,8 +190,27 @@ quantum-dengue-stpp/
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/health` | GET | Health check |
+| `/metrics` | GET | Prometheus metrics |
 | `/predict` | POST | Single location prediction |
 | `/predict/batch` | POST | Batch predictions |
+
+---
+
+## Deployment
+
+```bash
+# Build Docker images
+./scripts/deploy.sh build
+
+# Start services
+./scripts/deploy.sh start
+
+# Deploy to staging
+./scripts/deploy.sh deploy-staging
+
+# Backup data
+./scripts/deploy.sh backup
+```
 
 ---
 

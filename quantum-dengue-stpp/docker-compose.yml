@@ -1,0 +1,161 @@
+# =============================================================================
+# Docker Compose for Quantum Dengue STPP
+# =============================================================================
+
+services:
+  # --------------------------------------------------------------------------
+  # API Service (Production)
+  # --------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    container_name: quantum-dengue-api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # --------------------------------------------------------------------------
+  # GPU API Service
+  # --------------------------------------------------------------------------
+  gpu-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: gpu-api
+    container_name: quantum-dengue-gpu-api
+    ports:
+      - "8001:8000"
+    environment:
+      - APP_ENV=production
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    runtime: nvidia
+    deploy:
+      replicas: 0  # Enable when GPU available
+
+  # --------------------------------------------------------------------------
+  # Jupyter Notebook (Research)
+  # --------------------------------------------------------------------------
+  notebook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: notebook
+    container_name: quantum-dengue-notebook
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_TOKEN=quantum-dengue-research
+    volumes:
+      - ./notebooks:/app/notebooks
+      - ./data:/app/data
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # Redis Cache (for production)
+  # --------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: quantum-dengue-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # --------------------------------------------------------------------------
+  # Nginx Reverse Proxy
+  # --------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: quantum-dengue-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # Prometheus Metrics
+  # --------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: quantum-dengue-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # Grafana Dashboard
+  # --------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: quantum-dengue-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+# -----------------------------------------------------------------------------
+# Volumes
+# -----------------------------------------------------------------------------
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+# -----------------------------------------------------------------------------
+# Networks
+# -----------------------------------------------------------------------------
+networks:
+  default:
+    name: quantum-dengue-network
+    driver: bridge

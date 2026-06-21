@@ -5,6 +5,7 @@ Provides REST API for:
 - Health check
 - Model predictions
 - Batch forecasting
+- Metrics & monitoring
 """
 import sys
 import os
@@ -14,29 +15,24 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 import numpy as np
 import torch
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, validator
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field, field_validator
 import logging
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
+# Initialize FastAPI app with metadata
 app = FastAPI(
     title="Quantum Dengue STPP API",
     description="Quantum-Enhanced Spatio-Temporal Point Process for Dengue Prediction",
     version="1.0.0",
-)
-
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 
@@ -286,8 +282,116 @@ async def root():
         "name": "Quantum Dengue STPP API",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "metrics": "/metrics"
     }
+
+
+# =============================================================================
+# Metrics Endpoint for Prometheus
+# =============================================================================
+
+@app.get("/metrics")
+async def metrics():
+    """
+    Prometheus-compatible metrics endpoint.
+    
+    Returns metrics in a format that Prometheus can scrape.
+    """
+    import psutil
+    
+    # Basic system metrics
+    cpu_percent = psutil.cpu_percent(interval=0.1)
+    memory = psutil.virtual_memory()
+    disk = psutil.disk_usage('/')
+    
+    metrics_text = f"""# HELP quantum_dengue_api_up API availability
+# TYPE quantum_dengue_api_up gauge
+quantum_dengue_api_up 1
+
+# HELP quantum_dengue_cpu_percent CPU usage percentage
+# TYPE quantum_dengue_cpu_percent gauge
+quantum_dengue_cpu_percent {cpu_percent}
+
+# HELP quantum_dengue_memory_percent Memory usage percentage
+# TYPE quantum_dengue_memory_percent gauge
+quantum_dengue_memory_percent {memory.percent}
+
+# HELP quantum_dengue_disk_percent Disk usage percentage
+# TYPE quantum_dengue_disk_percent gauge
+quantum_dengue_disk_percent {disk.percent}
+
+# HELP quantum_dengue_predictions_total Total number of predictions
+# TYPE quantum_dengue_predictions_total counter
+quantum_dengue_predictions_total {getattr(predictor, 'total_predictions', 0)}
+
+# HELP quantum_dengue_predictions_high_risk Total high risk predictions
+# TYPE quantum_dengue_predictions_high_risk counter
+quantum_dengue_predictions_high_risk {getattr(predictor, 'high_risk_count', 0)}
+
+# HELP quantum_dengue_model_loaded Model loaded status
+# TYPE quantum_dengue_model_loaded gauge
+quantum_dengue_model_loaded {1 if predictor.is_loaded else 0}
+
+# HELP quantum_dengue_gpu_available GPU availability
+# TYPE quantum_dengue_gpu_available gauge
+quantum_dengue_gpu_available {1 if predictor.device == "cuda" else 0}
+"""
+    
+    return Response(content=metrics_text, media_type="text/plain")
+
+
+# =============================================================================
+# Middleware for request timing and security
+# =============================================================================
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    """Add processing time and security headers."""
+    start_time = time.time()
+    
+    response = await call_next(request)
+    
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000"
+    
+    return response
+
+
+# =============================================================================
+# Exception handlers
+# =============================================================================
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Custom HTTP exception handler."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.detail,
+            "status_code": exc.status_code,
+            "timestamp": datetime.now().isoformat(),
+            "path": str(request.url),
+        }
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """General exception handler."""
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "status_code": 500,
+            "timestamp": datetime.now().isoformat(),
+            "path": str(request.url),
+        }
+    )
 
 
 if __name__ == "__main__":
