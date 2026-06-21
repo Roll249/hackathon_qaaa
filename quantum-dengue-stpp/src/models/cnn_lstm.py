@@ -21,12 +21,20 @@ class ConvBlock(nn.Module):
 
 class SpatioTemporalCNN(nn.Module):
     def __init__(self, input_channels=1, conv_channels=None, lstm_hidden=64,
-                 lstm_layers=2, dropout=0.3, grid_size=16, forecast_horizon=1):
+                 lstm_layers=2, dropout=0.3, grid_size=16, forecast_horizon=1,
+                 output_activation='softplus'):
+        """
+        Args:
+            output_activation: 'softplus' for count data (ensures non-negative)
+                             'exp' for log-link Poisson regression
+                             'linear' for standard regression
+        """
         super().__init__()
         if conv_channels is None:
             conv_channels = [32, 64]
 
         self.forecast_horizon = forecast_horizon
+        self.output_activation = output_activation
 
         layers = []
         in_ch = input_channels
@@ -56,6 +64,21 @@ class SpatioTemporalCNN(nn.Module):
             nn.Linear(lstm_hidden, forecast_horizon),
         )
 
+    def _apply_output_activation(self, x):
+        """
+        Apply output activation to ensure non-negative count predictions.
+        
+        For count data (dengue cases), we MUST ensure predictions >= 0.
+        - softplus(x) = log(1 + exp(x)) > 0 always
+        - This is equivalent to log-link Poisson regression
+        """
+        if self.output_activation == 'softplus':
+            return torch.nn.functional.softplus(x)
+        elif self.output_activation == 'exp':
+            return torch.exp(x)
+        else:  # linear
+            return x
+
     def forward(self, x):
         """x: (batch, seq_len, H, W) or (batch, H, W)"""
         x = x.float()
@@ -72,7 +95,12 @@ class SpatioTemporalCNN(nn.Module):
         _, (h_n, _) = self.lstm(x)
         last = h_n[-1]
 
-        return self.head(last)
+        output = self.head(last)
+        
+        # CRITICAL: Ensure non-negative predictions for count data
+        output = self._apply_output_activation(output)
+        
+        return output
 
 
 def create_sequences(grid, seq_len=12, forecast_horizon=1):

@@ -8,6 +8,8 @@ where h(s, t) = encoder(spatial_context, temporal_hidden_state).
 
 This implementation uses a grid-based approach where the intensity
 at each grid cell is predicted using a shared encoder + per-cell head.
+
+CRITICAL: Output is ALWAYS positive (softplus) for count data.
 """
 import numpy as np
 import torch
@@ -24,16 +26,22 @@ class NESTIntensity(nn.Module):
     """
 
     def __init__(self, gs: int = 20, hidden: int = 64, temporal_hidden: int = 64,
-                 n_layers: int = 2, dropout: float = 0.2):
+                 n_layers: int = 2, dropout: float = 0.2,
+                 output_activation: str = 'softplus'):
+        """
+        Args:
+            output_activation: 'softplus' or 'exp' for count data positivity
+        """
         super().__init__()
         self.gs = gs
+        self.output_activation = output_activation
 
         # Spatial encoder — CNN that outputs a fixed-size spatial embedding
         self.spatial_encoder = nn.Sequential(
             nn.Conv2d(1, hidden, 3, padding=1), nn.BatchNorm2d(hidden), nn.ReLU(),
             nn.Conv2d(hidden, hidden, 3, padding=1), nn.BatchNorm2d(hidden), nn.ReLU(),
-            nn.AdaptiveAvgPool2d(4),   # → (B, hidden, 4, 4)
-            nn.Flatten(2),             # → (B, hidden*16)
+            nn.AdaptiveAvgPool2d((4, 4)),   # → (B, hidden, 4, 4)
+            nn.Flatten(),                    # → (B, hidden*4*4)
         )
         spatial_dim = hidden * 16
 
@@ -52,10 +60,23 @@ class NESTIntensity(nn.Module):
             nn.Linear(hidden, gs * gs),        # log-intensity per cell
         )
 
+    def _ensure_positive(self, log_intensity):
+        """
+        CRITICAL: Ensure intensity is always positive for count data.
+        - softplus(x) = log(1 + exp(x)) > 0 always
+        - This is mathematically correct for Poisson/NB regression
+        """
+        if self.output_activation == 'softplus':
+            return torch.nn.functional.softplus(log_intensity)
+        elif self.output_activation == 'exp':
+            return torch.exp(log_intensity)
+        else:
+            return log_intensity
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         x: (B, T, H, W) — sequence of spatial grids
-        Returns: (B, H, W) — predicted intensity for last time step
+        Returns: (B, H, W) — predicted intensity for last time step (ALWAYS positive)
         """
         B, T, H, W = x.shape
 
@@ -70,9 +91,13 @@ class NESTIntensity(nn.Module):
         _, (h_T, _) = self.temporal(emb_tensor)        # (n_layers, B, temporal_hidden)
         h_last = h_T[-1]                               # (B, temporal_hidden)
 
-        # Per-cell intensity
+        # Per-cell intensity (log scale)
         log_intensity = self.intensity_head(h_last)   # (B, gs*gs)
-        return log_intensity.view(B, self.gs, self.gs)  # (B, H, W)
+        
+        # CRITICAL: Convert to positive intensity for count data
+        intensity = self._ensure_positive(log_intensity)
+        
+        return intensity.view(B, self.gs, self.gs)  # (B, H, W)
 
 
 class NESTForecaster:
@@ -82,12 +107,16 @@ class NESTForecaster:
     Minimizes negative log-likelihood of observed counts:
         -log p(counts | λ) = Σ cells [λ[cell] - counts[cell] * log(λ[cell])]
     (Poisson NLL — appropriate for count data)
+    
+    CRITICAL: Uses softplus output activation to ensure λ > 0 always.
     """
 
     def __init__(self, gs: int = 20, hidden: int = 64, temporal_hidden: int = 64,
-                 n_layers: int = 2, dropout: float = 0.2):
+                 n_layers: int = 2, dropout: float = 0.2,
+                 output_activation: str = 'softplus'):
         self.gs = gs
-        self.model = NESTIntensity(gs, hidden, temporal_hidden, n_layers, dropout)
+        self.model = NESTIntensity(gs, hidden, temporal_hidden, n_layers, dropout,
+                                  output_activation=output_activation)
         self.hidden = hidden
         self.temporal_hidden = temporal_hidden
         self.n_layers = n_layers
