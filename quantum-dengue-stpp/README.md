@@ -6,9 +6,29 @@
 
 This project investigates whether quantum generative models can produce more diverse and realistic synthetic dengue fever event sequences than classical augmentation methods, thereby improving the accuracy of spatio-temporal point process (STPP) forecasting models.
 
+---
+
+## Key Improvements (v2)
+
+### Production-Ready Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Data Leakage Prevention** | ✅ | `validate_no_data_leakage()` prevents temporal contamination |
+| **Adaptive Spatial Gridding** | ✅ | Country-specific normalization for quantum embedding |
+| **Softplus Output Activation** | ✅ | Ensures non-negative predictions for count data |
+| **Unit Tests** | ✅ | 29 pytest tests, all passing |
+| **Logging System** | ✅ | Structured logging with TrainingLogger, DataLogger, QuantumLogger |
+| **Model Serialization** | ✅ | torch.save/load with metadata |
+| **FastAPI Endpoints** | ✅ | REST API for predictions |
+
+---
+
 ## Research Question
 
 > Can quantum generative models produce more diverse and realistic synthetic dengue fever data that better preserves spatio-temporal structure compared to classical augmentation methods, thereby improving outbreak prediction accuracy?
+
+---
 
 ## Architecture
 
@@ -29,6 +49,8 @@ flowchart LR
     I --> J[RMSE, MAE, K-function, L-function]
 ```
 
+---
+
 ## Pipeline
 
 ### Stage 1: Extended EDA
@@ -41,6 +63,7 @@ flowchart LR
 - Convert admin1-month aggregates to point events
 - Geocode centroids for each region
 - Create spatial grid for CNN input
+- **Adaptive gridding with [0,1]² normalization for quantum circuits**
 
 ### Stage 3: Baseline Models
 - CNN-LSTM with spatial attention
@@ -56,7 +79,8 @@ flowchart LR
 - Quantum Born Machine (QBM)
 - Variational Quantum Circuit Generator
 - Hybrid Latent Style-Based QGAN
-- Statistical validation (K/L function)
+- **Local PQC with spatial clustering (DBSCAN/K-Means)**
+- **ZINB Loss for zero-inflated count data**
 
 ### Stage 6: Integrated Training
 - Retrain all models with augmented data
@@ -66,27 +90,46 @@ flowchart LR
 ### Stage 7: Evaluation
 - Forecasting metrics (RMSE, MAE, MAPE, R2)
 - Point process quality (K-function, L-function, g(r))
-- Statistical significance tests
+- **Quantum Fisher Information for advantage measurement**
+
+---
 
 ## Setup
 
 ```bash
+# Clone and setup
+git clone https://github.com/Roll249/hackathon_qaaa.git
+cd quantum-dengue-stpp
+
+# Create virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
+
+---
 
 ## Usage
 
 ```bash
-# Run full pipeline
-cd notebooks
-jupyter notebook
+# Run GPU pipeline with data leakage prevention
+python run_gpu_pipeline.py --data_dir dengue_dataset --output_dir output_result
 
-# Or run scripts directly
-python src/models/train_cnn_lstm.py --config configs/config.yaml
-python src/augmentation/quantum_augment.py --config configs/config.yaml
+# Run unit tests
+python -m pytest tests/ -v
+
+# Start API server
+python -m src.api.endpoints
+
+# Generate predictions via API
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"location": {"latitude": 10.8, "longitude": 106.7}, "forecast_horizon": 3}'
 ```
+
+---
 
 ## Data
 
@@ -110,5 +153,36 @@ python src/augmentation/quantum_augment.py --config configs/config.yaml
 - **Best: CNN-LSTM + Quantum** — R² = 0.858, Pearson r = 0.967
 - **Runtime: 6.2 minutes** on AMD Ryzen 7 7840HS (8 cores), CPU-only
 - **Spatial clustering confirmed:** Indonesia (L=+169), Malaysia (L=+131), Vietnam (L=+72)
+
+---
+
+## Project Structure
+
+```
+quantum-dengue-stpp/
+├── src/
+│   ├── api/              # FastAPI endpoints
+│   ├── augmentation/     # Quantum augmentation (QBM, QGAN, Local PQC)
+│   ├── data/            # Data loading with leakage prevention
+│   ├── evaluation/      # Metrics (forecasting + point process)
+│   ├── models/         # CNN-LSTM, NEST, Hawkes, ZINB
+│   └── utils/           # Logging, serialization
+├── tests/               # pytest unit tests (29 tests)
+├── dengue_dataset/      # Data processing scripts
+├── output_result/       # Results and visualizations
+└── run_gpu_pipeline.py  # Main pipeline
+```
+
+---
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/predict` | POST | Single location prediction |
+| `/predict/batch` | POST | Batch predictions |
+
+---
 
 Full results in `docs/SYNTHESIS.md`.
