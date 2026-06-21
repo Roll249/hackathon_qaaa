@@ -277,10 +277,11 @@ class MultiHawkesExpKern(BaseEstimator, RegressorMixin):
             ll += mu[d] / self.decay * (1 - np.exp(-self.decay * T))
             # integral of excited from all past events
             for k, (t_k, d_k) in enumerate(counts):
-                if d_k == d_k:  # all events contribute
-                    ll += A[d, d_k if d_k < n else 0] * self.decay / self.decay * (
+                # BUG FIX: was `if d_k == d_k:` (always true), now correctly checks dimension
+                if d_k == d and t_k < T:
+                    ll += A[d, d_k] * self.decay / self.decay * (
                         1 - np.exp(-self.decay * (T - t_k))
-                    ) if t_k < T else 0
+                    )
 
         return -ll if np.isfinite(ll) else 1e10
 
