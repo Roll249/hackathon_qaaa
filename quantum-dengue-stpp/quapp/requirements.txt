@@ -1,0 +1,6 @@
+# QuApp CLI for deployment
+quapp>=0.1.5
+
+# QuApp SDKs
+quapp-pennylane>=0.0.5
+quapp-qiskit>=0.0.12
