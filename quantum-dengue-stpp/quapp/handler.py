@@ -3,18 +3,19 @@ QuApp Quantum Handler for Dengue STPP Prediction
 
 This handler runs quantum circuits for dengue prediction via QuApp Platform.
 Supports both simulators and real quantum hardware.
+
+QuApp Format:
+- processing(): Main quantum circuit execution
+- post_processing(): Result formatting
 """
 import json
 import numpy as np
 from typing import Dict, Any, Optional
 
 
-def handler(
-    event: Dict[str, Any],
-    context: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+def processing(event: Dict[str, Any]) -> Dict[str, Any]:
     """
-    QuApp handler function for quantum circuit execution.
+    Main processing function for QuApp.
     
     Args:
         event: Input parameters containing:
@@ -23,41 +24,30 @@ def handler(
             - n_layers: Number of circuit layers
             - features: Input features for circuit
             - shots: Number of measurement shots
-        context: QuApp execution context (optional)
     
     Returns:
-        Dictionary with:
-            - results: Circuit measurement results
-            - counts: Measurement counts
-            - expectation_values: Expectation values
-            - device_used: Device that executed the circuit
+        Raw quantum computation results
     """
     try:
-        # Extract parameters
         circuit_type = event.get("circuit_type", "qbm")
         n_qubits = event.get("n_qubits", 4)
         n_layers = event.get("n_layers", 3)
         features = event.get("features", None)
         shots = event.get("shots", 1024)
         
-        # Device info from QuApp
-        device_info = event.get("_quapp_device", "Simulator")
-        
-        # Execute quantum circuit
         if circuit_type == "qbm":
-            results = run_qbm_circuit(n_qubits, n_layers, features, shots)
+            raw_results = run_qbm_circuit(n_qubits, n_layers, features, shots)
         elif circuit_type == "local_pqc":
-            results = run_local_pqc_circuit(n_qubits, n_layers, features, shots)
+            raw_results = run_local_pqc_circuit(n_qubits, n_layers, features, shots)
         elif circuit_type == "qgan":
-            results = run_qgan_circuit(n_qubits, n_layers, features, shots)
+            raw_results = run_qgan_circuit(n_qubits, n_layers, features, shots)
         else:
             raise ValueError(f"Unknown circuit type: {circuit_type}")
         
         return {
             "status": "success",
             "circuit_type": circuit_type,
-            "results": results,
-            "device_used": device_info,
+            "raw_results": raw_results,
             "n_qubits": n_qubits,
             "n_layers": n_layers,
             "shots": shots,
@@ -67,8 +57,84 @@ def handler(
         return {
             "status": "error",
             "error": str(e),
-            "circuit_type": circuit_type,
         }
+
+
+def post_processing(result: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Post-processing function for QuApp.
+    
+    Formats raw quantum results into user-friendly output.
+    """
+    try:
+        if result.get("status") == "error":
+            return {
+                "status": "error",
+                "message": result.get("error", "Unknown error"),
+            }
+        
+        circuit_type = result.get("circuit_type", "qbm")
+        raw_results = result.get("raw_results", {})
+        n_qubits = result.get("n_qubits", 4)
+        n_layers = result.get("n_layers", 3)
+        shots = result.get("shots", 1024)
+        
+        # Format based on circuit type
+        if circuit_type == "qbm":
+            intensity = float(np.mean(raw_results.get("expectation_values", [])))
+            uncertainty = float(np.std(raw_results.get("expectation_values", [])))
+            formatted = {
+                "intensity_estimate": abs(intensity),
+                "uncertainty": uncertainty,
+                "expectation_values": raw_results.get("expectation_values", []),
+                "sample_statistics": {
+                    "mean": raw_results.get("sample_mean", 0),
+                    "std": raw_results.get("sample_std", 0),
+                },
+            }
+        elif circuit_type == "local_pqc":
+            exp_val = raw_results.get("expectation_value", 0)
+            formatted = {
+                "intensity_estimate": abs(exp_val),
+                "local_correlation": exp_val,
+                "variance": raw_results.get("sample_variance", 0),
+                "circuit_depth": raw_results.get("circuit_depth", 0),
+            }
+        elif circuit_type == "qgan":
+            formatted = {
+                "generated_distribution": raw_results.get("generator_output", []),
+                "discriminator_score": raw_results.get("discriminator_score", 0),
+                "adversarial_loss": raw_results.get("adversarial_loss_proxy", 0),
+            }
+        else:
+            formatted = raw_results
+        
+        return {
+            "status": "success",
+            "circuit_type": circuit_type,
+            "results": formatted,
+            "metadata": {
+                "n_qubits": n_qubits,
+                "n_layers": n_layers,
+                "shots": shots,
+            },
+        }
+    
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Post-processing failed: {str(e)}",
+        }
+
+
+# Legacy handler for backward compatibility
+def handler(
+    event: Dict[str, Any],
+    context: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """Legacy handler - calls processing() then post_processing()"""
+    raw_result = processing(event)
+    return post_processing(raw_result)
 
 
 def run_qbm_circuit(

@@ -1,5 +1,2 @@
-# QuApp CLI for deployment
-quapp>=0.1.5
-
-# QuApp SDKs for PennyLane (Qiskit SDK requires Python <3.11)
-quapp-pennylane>=0.0.5.dev2
+pennylane>=0.35.0
+numpy>=1.24.0
