@@ -322,7 +322,14 @@ class ClusteredLocalPQC(nn.Module):
     - Spatial clustering separates events into geographic hotspots
     - Each cluster has its own Local PQC (shared architecture, independent params)
     - Outputs are aggregated for prediction
+
+    NISQ hardware compatibility:
+    - Circuit depth is capped at max 4 layers for local PQCs and global PQC.
+    - StronglyEntanglingLayers with >4 layers may exceed coherence time on NISQ devices.
     """
+
+    # Class constant for NISQ hardware compatibility
+    MAX_CIRCUIT_LAYERS = 4  # Maximum layers for NISQ hardware compatibility
 
     def __init__(self, n_clusters: int = 8, n_qubits: int = 4, n_layers: int = 3,
                  feature_dim: int = 8, aggregation: str = 'weighted',
@@ -331,15 +338,31 @@ class ClusteredLocalPQC(nn.Module):
         Args:
             n_clusters: Maximum number of clusters
             n_qubits: Qubits per local PQC
-            n_layers: Variational layers per PQC
+            n_layers: Variational layers per PQC (capped at 4 for NISQ)
             feature_dim: Input feature dimension
             aggregation: 'weighted', 'mean', or 'sum'
             ansatz: forwarded to each :class:`LocalPQC` ('strongly_entangling' or
                     'data_reuploading').
+
+        Note:
+            n_layers is capped at MAX_CIRCUIT_LAYERS (4) for NISQ hardware compatibility.
+            Deeper circuits may exceed coherence time and degrade performance.
         """
+        import warnings
+
         super().__init__()
         self.n_clusters = n_clusters
         self.n_qubits = n_qubits
+
+        # Circuit depth validation for NISQ compatibility
+        if n_layers > ClusteredLocalPQC.MAX_CIRCUIT_LAYERS:
+            warnings.warn(
+                f"n_layers={n_layers} exceeds NISQ recommendation (max {ClusteredLocalPQC.MAX_CIRCUIT_LAYERS}). "
+                f"Circuit depth will be capped. For deeper circuits, consider using simulator "
+                f"or quantum error mitigation techniques."
+            )
+            n_layers = ClusteredLocalPQC.MAX_CIRCUIT_LAYERS
+
         self.n_layers = n_layers
         self.feature_dim = feature_dim
         self.aggregation = aggregation
@@ -349,26 +372,66 @@ class ClusteredLocalPQC(nn.Module):
         self.cluster_pqcs = nn.ModuleList([
             LocalPQC(
                 n_qubits=min(n_qubits, 6),  # Cap at 6 qubits
-                n_layers=n_layers,
+                n_layers=self.n_layers,
                 feature_dim=feature_dim,
                 ansatz=ansatz,
             )
             for _ in range(n_clusters)
         ])
 
-        # Cluster attention weights (learnable)
+        # Cluster attention weights (learnable - classical)
         self.cluster_attention = nn.Sequential(
             nn.Linear(feature_dim, n_clusters),
             nn.Softmax(dim=-1)
         )
 
         # Global PQC for cross-cluster learning
+        # Cap layers at MAX_CIRCUIT_LAYERS for NISQ compatibility
+        global_layers = min(self.n_layers, ClusteredLocalPQC.MAX_CIRCUIT_LAYERS)
         self.global_pqc = LocalPQC(
             n_qubits=min(n_qubits + 2, 8),
-            n_layers=n_layers + 1,
+            n_layers=global_layers,
             feature_dim=feature_dim + n_clusters,  # Features + cluster indicators
             ansatz=ansatz,
         )
+
+        # Log circuit specs for debugging
+        self._circuit_depth_info = self._estimate_circuit_depth()
+
+    def _estimate_circuit_depth(self) -> dict:
+        """Estimate circuit depth for local and global PQC using qml.specs."""
+        try:
+            import pennylane as qml
+
+            # Create a dummy circuit to estimate depth
+            device = qml.device("default.qubit", wires=self.n_qubits)
+
+            @qml.qnode(device, interface="torch", diff_method="parameter-shift")
+            def dummy_circuit(features, weights):
+                qml.AngleEmbedding(features[:self.n_qubits], wires=range(self.n_qubits), rotation='X')
+                qml.templates.StronglyEntanglingLayers(weights, wires=range(self.n_qubits))
+                return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
+
+            # Get specs
+            dummy_weights = torch.randn(self.n_layers, self.n_qubits, 3) * 0.1
+            dummy_features = torch.randn(self.n_qubits)
+
+            specs = qml.specs(dummy_circuit)(dummy_features, dummy_weights)
+
+            return {
+                'local_pqc_depth': specs.get('depth', self.n_layers * 4),
+                'local_pqc_gates': specs.get('num_gates', self.n_layers * self.n_qubits * 4),
+                'local_pqc_params': specs.get('num_parameters', self.n_layers * self.n_qubits * 3),
+                'max_recommended_layers': ClusteredLocalPQC.MAX_CIRCUIT_LAYERS,
+            }
+        except Exception:
+            # Fallback estimation
+            return {
+                'local_pqc_depth': self.n_layers * 4,  # RY+RZ+RX+CNOT per layer
+                'local_pqc_gates': self.n_layers * self.n_qubits * 4,
+                'local_pqc_params': self.n_layers * self.n_qubits * 3,
+                'max_recommended_layers': ClusteredLocalPQC.MAX_CIRCUIT_LAYERS,
+            }
 
     def forward(self, x: torch.Tensor,
                 cluster_ids: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -448,7 +511,8 @@ def create_local_pqc_training_pipeline(
     lr: float = 1e-3,
     batch_size: int = 32,
     device: str = 'cuda',
-    verbose: bool = True
+    verbose: bool = True,
+    optimizer_type: str = 'adam',
 ) -> Tuple[ClusteredLocalPQC, Dict]:
     """
     Complete pipeline for training Local PQC with spatial clustering.
@@ -460,16 +524,18 @@ def create_local_pqc_training_pipeline(
         n_clusters: Number of spatial clusters
         cluster_method: 'dbscan', 'kmeans', or 'ripley_kmeans'
         n_qubits: Qubits per local PQC
-        n_layers: Variational layers
+        n_layers: Variational layers (capped at 4 for NISQ compatibility)
         epochs: Training epochs
         lr: Learning rate
         batch_size: Batch size
         device: 'cuda' or 'cpu'
         verbose: Print progress
+        optimizer_type: 'adam' or 'qng' for quantum natural gradient
 
     Returns:
         model: Trained ClusteredLocalPQC
-        info: Training info (cluster assignments, metrics, etc.)
+        info: Training info including optimizer_used, total_epochs, best_loss,
+              avg_epoch_time_sec, total_time_sec
     """
     import time
 
@@ -505,6 +571,11 @@ def create_local_pqc_training_pipeline(
         feature_dim=features.shape[1]
     ).to(device)
 
+    # Log circuit depth info
+    if verbose:
+        depth_info = model._circuit_depth_info
+        print(f"    Circuit depth: {depth_info['local_pqc_depth']} (NISQ max: {depth_info['max_recommended_layers']})")
+
     # Step 3: Prepare Data
     cluster_tensor = torch.LongTensor(cluster_labels)
     features_tensor = torch.FloatTensor(features)
@@ -519,17 +590,34 @@ def create_local_pqc_training_pipeline(
 
     # Step 4: Training
     if verbose:
-        print(f"  [Local PQC] Step 3: Training ({epochs} epochs)...")
+        opt_name = 'QNG + AdamW' if optimizer_type == 'qng' else 'AdamW'
+        print(f"  [Local PQC] Step 3: Training ({epochs} epochs, optimizer={opt_name})...")
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     criterion = nn.MSELoss()
+    epoch_times = []
 
-    history = {'loss': [], 'mse': []}
+    # Create optimizer based on type
+    if optimizer_type == 'qng':
+        from .quantum_natural_gradient import create_qng_optimizer
+
+        optimizer = create_qng_optimizer(
+            model,
+            lr_q=lr,
+            lr_c=lr,
+            use_diag_qng=True,  # Use DiagonalQNG for speed
+            qng_for_weights="pqc",
+            device=device,
+        )
+    else:
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+
+    history = {'loss': [], 'mse': [], 'epoch_time': []}
     best_loss = float('inf')
     best_state = None
 
     for epoch in range(epochs):
         model.train()
+        epoch_start = time.time()
         epoch_loss = 0.0
         epoch_mse = 0.0
         n_batches = 0
@@ -550,16 +638,19 @@ def create_local_pqc_training_pipeline(
             epoch_mse += loss.item()
             n_batches += 1
 
+        epoch_time = time.time() - epoch_start
+        epoch_times.append(epoch_time)
         avg_loss = epoch_loss / max(n_batches, 1)
         history['loss'].append(avg_loss)
         history['mse'].append(epoch_mse / max(n_batches, 1))
+        history['epoch_time'].append(epoch_time)
 
         if avg_loss < best_loss:
             best_loss = avg_loss
             best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
 
         if verbose and (epoch + 1) % 20 == 0:
-            print(f"    Epoch {epoch+1:>4}/{epochs} | Loss: {avg_loss:.4f}")
+            print(f"    Epoch {epoch+1:>4}/{epochs} | Loss: {avg_loss:.4f} | Time: {epoch_time:.2f}s")
 
     # Load best model
     if best_state:
@@ -568,19 +659,35 @@ def create_local_pqc_training_pipeline(
     # Step 5: Compute cluster expressivities
     expressivities = model.get_cluster_expressivity()
 
+    total_time = time.time() - t0
+    avg_epoch_time = np.mean(epoch_times) if epoch_times else 0.0
+
     info = {
         'cluster_labels': cluster_labels,
         'n_clusters': n_clusters_found,
         'cluster_centers': clusterer.cluster_centers_,
         'expressivities': expressivities,
         'best_loss': best_loss,
-        'training_time': time.time() - t0,
+        'training_time': total_time,
+        'optimizer_used': 'qng' if optimizer_type == 'qng' else 'adam',
+        'total_epochs': epochs,
+        'avg_epoch_time_sec': avg_epoch_time,
+        'total_time_sec': total_time,
+        'circuit_depth': model._circuit_depth_info,
     }
 
     if verbose:
         print(f"  [Local PQC] Training complete in {info['training_time']:.1f}s")
+        print(f"    Optimizer: {info['optimizer_used'].upper()}")
         print(f"    Best loss: {best_loss:.4f}")
+        print(f"    Avg epoch time: {avg_epoch_time:.2f}s")
         print(f"    Cluster expressivities: {[f'{e:.4f}' for e in expressivities]}")
+
+        # Benchmark comparison for QNG
+        if optimizer_type == 'qng':
+            print(f"\n  [QNG Benchmark]")
+            print(f"    Avg epoch time: {avg_epoch_time:.2f}s")
+            print(f"    Note: QNG overhead expected due to metric tensor computation.")
 
     return model, info
 
