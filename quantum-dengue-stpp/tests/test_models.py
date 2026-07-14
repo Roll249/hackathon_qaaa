@@ -9,76 +9,62 @@ import pytest
 import torch
 import numpy as np
 import pandas as pd
-from models.cnn_lstm import SpatioTemporalCNN, create_sequences
+from models.cnn_lstm import SpatioTemporalCNNv2, create_sequences_v2, train_cnn_lstm_v2
 from models.nest import NESTIntensity, NESTForecaster
 from models.hawkes import MultiDimensionalHawkes, HawkesBaseline
 
 
 class TestCNNLSTM:
-    """Tests for CNN-LSTM model."""
+    """Tests for CNN-LSTM v2 model."""
 
     @pytest.fixture
     def model(self):
-        return SpatioTemporalCNN(grid_size=20, forecast_horizon=1, output_activation='softplus')
+        return SpatioTemporalCNNv2(grid_size=20, forecast_horizon=1, loss='mse')
 
     def test_forward_shape(self, model):
         """Test that forward pass returns correct shape."""
         batch_size = 4
         seq_len = 12
         grid_size = 20
-        
+
         x = torch.randn(batch_size, seq_len, grid_size, grid_size)
         output = model(x)
-        
+
         assert output.shape == (batch_size, 1)
 
     def test_positive_output(self, model):
-        """Test that softplus ensures non-negative output."""
+        """Test that model produces finite output."""
         x = torch.randn(4, 12, 20, 20)
         output = model(x)
-        
-        assert output.min() >= 0, "Softplus should ensure non-negative output"
-        assert torch.isfinite(output).all(), "Output should be finite"
 
-    def test_different_activations(self):
-        """Test different output activations."""
-        for activation in ['softplus', 'exp', 'linear']:
-            model = SpatioTemporalCNN(
-                grid_size=20, 
-                forecast_horizon=1, 
-                output_activation=activation
-            )
-            x = torch.randn(4, 12, 20, 20)
-            output = model(x)
-            assert output.shape == (4, 1)
-            assert torch.isfinite(output).all()
+        assert torch.isfinite(output).all(), "Output should be finite"
 
 
 class TestCreateSequences:
-    """Tests for sequence creation."""
+    """Tests for sequence creation (v2 with spatial mean feature)."""
 
     def test_sequence_shape(self):
         """Test that sequences have correct shape."""
         grid = np.random.rand(16, 16, 50)  # H, W, T
-        X, y = create_sequences(grid, seq_len=12, forecast_horizon=1)
-        
-        expected_seqs = 50 - 12 - 1 + 1  # 38
-        assert X.shape == (expected_seqs, 12, 16, 16)
-        assert y.shape == (expected_seqs,)
+        X, y = create_sequences_v2(grid, seq_len=12, forecast_horizon=1)
+
+        expected_seqs = 50 - 12  # 38, since v2 uses t in range(seq_len, T - fh + 1)
+        assert X.shape == (expected_seqs, 12, 16, 16), X.shape
+        assert y.shape == (expected_seqs,), y.shape
 
     def test_non_negative_sequences(self):
         """Test that sequences are non-negative."""
         grid = np.abs(np.random.randn(16, 16, 50))
-        X, y = create_sequences(grid)
-        
+        X, y = create_sequences_v2(grid)
+
         assert X.min() >= 0
         assert y.min() >= 0
 
     def test_empty_grid(self):
         """Test handling of empty grid."""
         grid = np.zeros((16, 16, 5))
-        X, y = create_sequences(grid, seq_len=12)
-        
+        X, y = create_sequences_v2(grid, seq_len=12)
+
         assert X.shape[0] == 0
 
 

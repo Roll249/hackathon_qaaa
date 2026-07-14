@@ -44,8 +44,9 @@ class LocationInput(BaseModel):
     """Geographic location input."""
     latitude: float = Field(..., ge=-90, le=90)
     longitude: float = Field(..., ge=-180, le=180)
-    
-    @validator('latitude', 'longitude')
+
+    @field_validator('latitude', 'longitude')
+    @classmethod
     def validate_coords(cls, v):
         if v is None or np.isnan(v):
             raise ValueError("Invalid coordinates")

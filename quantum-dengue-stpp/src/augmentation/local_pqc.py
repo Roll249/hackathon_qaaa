@@ -13,6 +13,18 @@ Cluster types supported:
 - DBSCAN: Density-based clustering (good for non-uniform hotspots)
 - K-Means: Centroid-based clustering (good for uniform urban patterns)
 - Ripley's L: Spatial autocorrelation-based clustering
+
+Variational ansatz:
+    ``LocalPQC`` supports two ansatz choices:
+    - ``"strongly_entangling"`` (default): PennyLane ``StronglyEntanglingLayers`` — the
+      legacy hardware-efficient ansatz. Useful as a baseline.
+    - ``"data_reuploading"``: Data-Reuploading Ansatz (Pérez-Salinas et al. 2020),
+      implemented in :mod:`augmentation.data_reuploading_ansatz`. Provably universal
+      and shown to mitigate (but not eliminate) Barren Plateaus on small circuits.
+
+References:
+    - Pérez-Salinas et al., "Data re-uploading for a universal quantum classifier",
+      Quantum 5, 391 (2020). arXiv:1907.02040
 """
 import numpy as np
 import torch
@@ -156,19 +168,28 @@ class LocalPQC(nn.Module):
     """
 
     def __init__(self, n_qubits: int = 4, n_layers: int = 3,
-                 feature_dim: int = 8, embedding_type: str = 'angle'):
+                 feature_dim: int = 8, embedding_type: str = 'angle',
+                 ansatz: str = 'strongly_entangling'):
         """
         Args:
             n_qubits: Number of qubits (determines expressibility)
             n_layers: Number of variational layers
             feature_dim: Input feature dimension
             embedding_type: 'angle', 'amplitude', or 'basis'
+            ansatz: variational ansatz — 'strongly_entangling' (default) or
+                    'data_reuploading' (universal, see :mod:`data_reuploading_ansatz`).
         """
         super().__init__()
         self.n_qubits = n_qubits
         self.n_layers = n_layers
         self.feature_dim = feature_dim
         self.embedding_type = embedding_type
+        if ansatz not in ('strongly_entangling', 'data_reuploading'):
+            raise ValueError(
+                f"Unknown ansatz: {ansatz!r}. "
+                "Choose 'strongly_entangling' or 'data_reuploading'."
+            )
+        self.ansatz = ansatz
 
         # Learnable circuit parameters
         self.q_weights = nn.Parameter(
@@ -245,20 +266,52 @@ class LocalPQC(nn.Module):
             intensities: (batch, 1) predicted intensities
         """
         # Pre-process features
-        x_proj = self.feature_proj(x)
+        x_proj = self.feature_proj(x).float()  # ensure float32 for quantum backend
 
-        # Build and execute circuit
-        circuit = self._build_circuit()
-        q_out = circuit(x_proj, self.q_weights)
+        if self.ansatz == 'data_reuploading':
+            q_out = self._forward_data_reuploading(x_proj)
+        else:
+            q_out = self._forward_strongly_entangling(x_proj)
 
-        if isinstance(q_out, (list, tuple)):
-            q_out = torch.stack(q_out)
+        # Match intensity_head dtype/device to avoid Double/Float mismatch
+        q_out = q_out.to(dtype=next(self.intensity_head.parameters()).dtype)
 
         # Post-process to intensity
         intensity = self.intensity_head(q_out)
         intensity = torch.exp(intensity)  # Ensure positive
 
         return intensity
+
+    def _forward_strongly_entangling(self, x_proj: torch.Tensor) -> torch.Tensor:
+        """Original StronglyEntanglingLayers path."""
+        circuit = self._build_circuit()
+        q_out = circuit(x_proj, self.q_weights)
+        if isinstance(q_out, (list, tuple)):
+            q_out = torch.stack(list(q_out), dim=0)
+        # PennyLane returns (n_qubits,) for a single input; we run with batched
+        # classical pre-projection so we keep that shape and let intensity_head
+        # handle a (batch, n_qubits) tensor.
+        if q_out.dim() == 1:
+            q_out = q_out.unsqueeze(0)
+        # PennyLane convention is (n_qubits,) per sample; transpose to (batch, n_qubits)
+        if q_out.shape[0] == self.n_qubits and q_out.dim() == 2:
+            q_out = q_out.transpose(0, 1)
+        return q_out
+
+    def _forward_data_reuploading(self, x_proj: torch.Tensor) -> torch.Tensor:
+        """Data-Reuploading Ansatz path (universal approximator)."""
+        # Lazy import to avoid hard dependency at module-load time
+        from .data_reuploading_ansatz import DataReuploadingPQC
+
+        if not hasattr(self, '_dr_pqc') or self._dr_pqc is None:
+            self._dr_pqc = DataReuploadingPQC(
+                n_qubits=self.n_qubits,
+                n_layers=self.n_layers,
+                feature_dim=self.n_qubits,  # we feed the projected features
+                entanglement='ring',
+            ).to(x_proj.device)
+
+        return self._dr_pqc(x_proj)
 
 
 class ClusteredLocalPQC(nn.Module):
@@ -272,7 +325,8 @@ class ClusteredLocalPQC(nn.Module):
     """
 
     def __init__(self, n_clusters: int = 8, n_qubits: int = 4, n_layers: int = 3,
-                 feature_dim: int = 8, aggregation: str = 'weighted'):
+                 feature_dim: int = 8, aggregation: str = 'weighted',
+                 ansatz: str = 'strongly_entangling'):
         """
         Args:
             n_clusters: Maximum number of clusters
@@ -280,6 +334,8 @@ class ClusteredLocalPQC(nn.Module):
             n_layers: Variational layers per PQC
             feature_dim: Input feature dimension
             aggregation: 'weighted', 'mean', or 'sum'
+            ansatz: forwarded to each :class:`LocalPQC` ('strongly_entangling' or
+                    'data_reuploading').
         """
         super().__init__()
         self.n_clusters = n_clusters
@@ -287,13 +343,15 @@ class ClusteredLocalPQC(nn.Module):
         self.n_layers = n_layers
         self.feature_dim = feature_dim
         self.aggregation = aggregation
+        self.ansatz = ansatz
 
         # Create local PQC for each cluster
         self.cluster_pqcs = nn.ModuleList([
             LocalPQC(
                 n_qubits=min(n_qubits, 6),  # Cap at 6 qubits
                 n_layers=n_layers,
-                feature_dim=feature_dim
+                feature_dim=feature_dim,
+                ansatz=ansatz,
             )
             for _ in range(n_clusters)
         ])
@@ -308,7 +366,8 @@ class ClusteredLocalPQC(nn.Module):
         self.global_pqc = LocalPQC(
             n_qubits=min(n_qubits + 2, 8),
             n_layers=n_layers + 1,
-            feature_dim=feature_dim + n_clusters  # Features + cluster indicators
+            feature_dim=feature_dim + n_clusters,  # Features + cluster indicators
+            ansatz=ansatz,
         )
 
     def forward(self, x: torch.Tensor,
