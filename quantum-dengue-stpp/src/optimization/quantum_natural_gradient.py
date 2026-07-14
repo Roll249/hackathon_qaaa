@@ -368,6 +368,8 @@ def create_qng_optimizer(
     lr_c: float = 1e-3,
     use_diag_qng: bool = True,
     qng_for_weights: str = "pqc",
+    max_grad_norm: float = 1.0,  # Gradient clipping for stability
+    diag_eps: float = 1e-6,  # Numerical stability
     device: str = "cpu",
 ) -> HybridQNGOptimizer:
     """
@@ -394,12 +396,15 @@ def create_qng_optimizer(
         use_diag_qng = False  # Not used
     elif qng_for_weights == "pqc":
         # QNG for PQC, AdamW for classical
+        # CRITICAL: Only apply QNG to actual quantum weights (q_weights), NOT classical layers!
         q_params = []
         c_params = []
         for name, param in model.named_parameters():
-            if 'q_weights' in name or 'cluster_pqcs' in name or 'global_pqc' in name:
+            # Only quantum parameters (rotation angles in the circuit)
+            if 'q_weights' in name:
                 q_params.append(param)
             else:
+                # Classical: feature projection, intensity head, attention
                 c_params.append(param)
     else:  # "all"
         # QNG for all params

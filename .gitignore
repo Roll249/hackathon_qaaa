@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.DS_Store
+*.swp
+*.swo
+.pytest_cache/
+.tox/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# OS
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/

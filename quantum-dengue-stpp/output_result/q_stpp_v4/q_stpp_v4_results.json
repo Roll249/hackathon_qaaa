@@ -1,0 +1,138 @@
+[
+  {
+    "r2_lambda": 0.9716722821543273,
+    "mae_lambda": 0.7409058809280396,
+    "rmse_lambda": 0.9882715344429016,
+    "r2_train": 0.9752164338504744,
+    "final_loss": 0.02199721708893776,
+    "best_loss": 0.02147010527551174,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 31,
+    "time": 0.01344609260559082,
+    "config": {
+      "sop": false,
+      "entanglement": false,
+      "intensity_q": false
+    }
+  },
+  {
+    "r2_lambda": 0.9391338691030605,
+    "mae_lambda": 0.8780725002288818,
+    "rmse_lambda": 1.448632836341858,
+    "r2_train": 0.8226459355494948,
+    "final_loss": 0.1962089091539383,
+    "best_loss": 0.19596479833126068,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 31,
+    "time": 145.23551082611084,
+    "config": {
+      "sop": false,
+      "entanglement": false,
+      "intensity_q": true
+    }
+  },
+  {
+    "r2_lambda": 0.9693242779783825,
+    "mae_lambda": 0.781370997428894,
+    "rmse_lambda": 1.0284137725830078,
+    "r2_train": 0.980376578948319,
+    "final_loss": 0.02030310034751892,
+    "best_loss": 0.02030310034751892,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 47,
+    "time": 0.015947818756103516,
+    "config": {
+      "sop": false,
+      "entanglement": true,
+      "intensity_q": false
+    }
+  },
+  {
+    "r2_lambda": 0.9299773216832385,
+    "mae_lambda": 1.0861157178878784,
+    "rmse_lambda": 1.5537811517715454,
+    "r2_train": 0.8471505593460923,
+    "final_loss": 0.19194917380809784,
+    "best_loss": 0.16490426659584045,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 47,
+    "time": 147.37123847007751,
+    "config": {
+      "sop": false,
+      "entanglement": true,
+      "intensity_q": true
+    }
+  },
+  {
+    "r2_lambda": 0.8983088668323572,
+    "mae_lambda": 1.210472822189331,
+    "rmse_lambda": 1.5677170753479004,
+    "r2_train": 0.9444132122807262,
+    "final_loss": 0.04367009922862053,
+    "best_loss": 0.02399861253798008,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 31,
+    "time": 0.014334440231323242,
+    "config": {
+      "sop": true,
+      "entanglement": false,
+      "intensity_q": false
+    }
+  },
+  {
+    "r2_lambda": 0.8613682777170414,
+    "mae_lambda": 1.2668365240097046,
+    "rmse_lambda": 1.8304482698440552,
+    "r2_train": 0.7948668754143027,
+    "final_loss": 0.2392549365758896,
+    "best_loss": 0.2392549365758896,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 31,
+    "time": 144.72032570838928,
+    "config": {
+      "sop": true,
+      "entanglement": false,
+      "intensity_q": true
+    }
+  },
+  {
+    "r2_lambda": 0.9559131029822128,
+    "mae_lambda": 0.7309736013412476,
+    "rmse_lambda": 1.0322405099868774,
+    "r2_train": 0.9814535733224337,
+    "final_loss": 0.02601212076842785,
+    "best_loss": 0.02601212076842785,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 47,
+    "time": 0.014601707458496094,
+    "config": {
+      "sop": true,
+      "entanglement": true,
+      "intensity_q": false
+    }
+  },
+  {
+    "r2_lambda": 0.9181041893460384,
+    "mae_lambda": 1.0805448293685913,
+    "rmse_lambda": 1.4068797826766968,
+    "r2_train": 0.8009282185478002,
+    "final_loss": 0.2097894698381424,
+    "best_loss": 0.2097894698381424,
+    "n_train": 350,
+    "n_test": 150,
+    "in_dim": 47,
+    "time": 142.3157651424408,
+    "config": {
+      "sop": true,
+      "entanglement": true,
+      "intensity_q": true
+    }
+  }
+]
