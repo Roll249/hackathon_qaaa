@@ -1,0 +1,20 @@
+{
+  "optimizer": "QNG",
+  "epochs": 100,
+  "n_layers": 3,
+  "n_clusters": 8,
+  "device": "cpu",
+  "best_loss": 4.832420900464058,
+  "r2_train": 0.06211687297146751,
+  "rmse_train": 2.2485332792683543,
+  "mae_train": 1.8011513319015502,
+  "avg_epoch_time_sec": 4.09817453622818,
+  "total_time_sec": 410.67590713500977,
+  "circuit_depth": {
+    "local_pqc_depth": 12,
+    "local_pqc_gates": 48,
+    "local_pqc_params": 36,
+    "max_recommended_layers": 4
+  },
+  "history_loss": []
+}

@@ -70,6 +70,39 @@ def fast_l_function(K, r_km):
     return np.sqrt(np.maximum(K, 1e-10) / np.pi) - r_km
 
 
+def compute_k_function(coords: np.ndarray, r_range: np.ndarray) -> np.ndarray:
+    """
+    Compute K-function from (n, 2) coordinate array.
+
+    Args:
+        coords: (n, 2) array of [lat, lon] coordinates
+        r_range: Array of distance radii (in same units as coords)
+
+    Returns:
+        K values at each radius
+    """
+    if coords.shape[1] != 2:
+        raise ValueError(f"Expected coords shape (n, 2), got {coords.shape}")
+
+    lats, lons = coords[:, 0], coords[:, 1]
+    return fast_k_function(lats, lons, r_range)
+
+
+def compute_l_function(coords: np.ndarray, r_range: np.ndarray) -> np.ndarray:
+    """
+    Compute L-function from (n, 2) coordinate array.
+
+    Args:
+        coords: (n, 2) array of [lat, lon] coordinates
+        r_range: Array of distance radii
+
+    Returns:
+        L values at each radius (L>0 clustering, L<0 regularity)
+    """
+    K = compute_k_function(coords, r_range)
+    return fast_l_function(K, r_range)
+
+
 def fast_pair_correlation(lats, lons, r_max_km=5.0, n_bins=20, max_n=500, seed=42):
     """Compute g(r) efficiently using subsampling."""
     n = len(lats)
@@ -165,18 +198,35 @@ def fast_morans_i(lats, lons, values, k=5, seed=42):
     return float(I), float(p_val)
 
 
-# Keep original functions for compatibility
-compute_k_function = fast_k_function
-compute_l_function = fast_l_function
-compute_pc_function = fast_pair_correlation
-spatial_autocorrelation = fast_morans_i
-zero_inflation_ratio = lambda d: float(np.mean(np.array(d) == 0))
-compute_overdispersion = lambda d: float(np.var(d) / max(np.mean(d), 1e-9))
-haversine_distance = lambda la1, lo1, la2, lo2: float(
-    2 * 6371.0 * np.arcsin(np.sqrt(np.minimum(
-        np.sin(np.radians(la2 - la1) / 2) ** 2 +
-        np.cos(np.radians(la1)) * np.cos(np.radians(la2)) *
-        np.sin(np.radians(lo2 - lo1) / 2) ** 2,
-        1.0
-    )))
-)
+def compute_pc_function(lats, lons, r_max_km=5.0, n_bins=20, max_n=500, seed=42):
+    """Wrapper for fast_pair_correlation."""
+    return fast_pair_correlation(lats, lons, r_max_km, n_bins, max_n, seed)
+
+
+def spatial_autocorrelation(lats, lons, values, k=5, seed=42):
+    """Wrapper for fast_morans_i."""
+    return fast_morans_i(lats, lons, values, k, seed)
+
+
+def zero_inflation_ratio(data):
+    """Compute zero-inflation ratio."""
+    arr = np.array(data)
+    return float(np.mean(arr == 0))
+
+
+def compute_overdispersion(data):
+    """Compute dispersion parameter (var/mean)."""
+    arr = np.array(data)
+    return float(np.var(arr) / max(np.mean(arr), 1e-9))
+
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """Compute haversine distance between two points."""
+    return float(
+        2 * 6371.0 * np.arcsin(np.sqrt(np.minimum(
+            np.sin(np.radians(lat2 - lat1) / 2) ** 2 +
+            np.cos(np.radians(lat1)) * np.cos(np.radians(lat2)) *
+            np.sin(np.radians(lon2 - lon1) / 2) ** 2,
+            1.0
+        )))
+    )

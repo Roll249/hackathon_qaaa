@@ -1,0 +1,19 @@
+{
+  "optimizer": "Adam",
+  "epochs": 100,
+  "n_layers": 3,
+  "n_clusters": 8,
+  "device": "cpu",
+  "best_loss": 4.46502336114645,
+  "r2_train": 0.1025924938509738,
+  "rmse_train": 2.1994789361211233,
+  "mae_train": 1.7385853095054626,
+  "avg_epoch_time_sec": 4.157168200016022,
+  "total_time_sec": 416.5945522785187,
+  "circuit_depth": {
+    "local_pqc_depth": 12,
+    "local_pqc_gates": 48,
+    "local_pqc_params": 36,
+    "max_recommended_layers": 4
+  }
+}
