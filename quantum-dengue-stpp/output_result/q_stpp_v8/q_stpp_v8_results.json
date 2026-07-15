@@ -1,0 +1,19 @@
+{
+  "config": {
+    "n_per_class": 15,
+    "grid_size": 12
+  },
+  "best_weights": {
+    "alpha": 0.0,
+    "beta": 0.0,
+    "gamma": 1.0
+  },
+  "val_accuracy": 0.8888888888888888,
+  "accuracies": {
+    "classical_k": 0.6888888888888889,
+    "quantum_kernel": 0.7333333333333333,
+    "qaoa_sop": 0.6888888888888889,
+    "hybrid": 0.6888888888888889
+  },
+  "improvement_over_best_individual": -0.0444444444444444
+}
