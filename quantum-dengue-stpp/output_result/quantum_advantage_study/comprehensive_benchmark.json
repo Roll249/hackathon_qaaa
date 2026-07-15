@@ -1,0 +1,182 @@
+{
+  "results": [
+    {
+      "N": 8,
+      "methods": {
+        "XY-QAOA": {
+          "best_mean": 0.03798043069003333,
+          "best_std": 0.015490666771512096,
+          "final_mean": 0.3020678007007171,
+          "time_mean": 0.18933730125427245,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.07183165777014706
+        },
+        "Classical SOP": {
+          "best_mean": 0.027309094397776394,
+          "best_std": 0.013105347109279722,
+          "final_mean": 0.08860912617300168,
+          "time_mean": 0.18797917366027833,
+          "funcs_mean": 3000.0,
+          "ref_mean": 0.07183165777014706
+        },
+        "Simulated Annealing": {
+          "best_mean": 0.07815504584226284,
+          "best_std": 0.030420333136565055,
+          "final_mean": 0.2384476021750984,
+          "time_mean": 0.007535505294799805,
+          "funcs_mean": 200.0,
+          "ref_mean": 0.07183165777014706
+        },
+        "Random Search": {
+          "best_mean": 0.052628823369738655,
+          "best_std": 0.013156634976425463,
+          "final_mean": 1.0931129603309195,
+          "time_mean": 0.017331266403198244,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.07183165777014706
+        }
+      }
+    },
+    {
+      "N": 12,
+      "methods": {
+        "XY-QAOA": {
+          "best_mean": 0.09973390619002895,
+          "best_std": 0.08239045779229695,
+          "final_mean": 0.2742799736958325,
+          "time_mean": 0.03745555877685547,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.286678921220315
+        },
+        "Classical SOP": {
+          "best_mean": 0.08549094952485353,
+          "best_std": 0.06871627181144689,
+          "final_mean": 0.5623227642529052,
+          "time_mean": 0.20113420486450195,
+          "funcs_mean": 3000.0,
+          "ref_mean": 0.286678921220315
+        },
+        "Simulated Annealing": {
+          "best_mean": 0.3149688190047438,
+          "best_std": 0.24180643787860392,
+          "final_mean": 0.6519258376607054,
+          "time_mean": 0.007782793045043946,
+          "funcs_mean": 200.0,
+          "ref_mean": 0.286678921220315
+        },
+        "Random Search": {
+          "best_mean": 0.1979629867188293,
+          "best_std": 0.15614795856398198,
+          "final_mean": 1.833957463799545,
+          "time_mean": 0.017663908004760743,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.286678921220315
+        }
+      }
+    },
+    {
+      "N": 16,
+      "methods": {
+        "XY-QAOA": {
+          "best_mean": 0.1150587541778764,
+          "best_std": 0.06308967525323152,
+          "final_mean": 0.28696005997130636,
+          "time_mean": 0.037055349349975585,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.2871426562260542
+        },
+        "Classical SOP": {
+          "best_mean": 0.10750155915799234,
+          "best_std": 0.059339835068008044,
+          "final_mean": 0.39931207397024787,
+          "time_mean": 0.20600547790527343,
+          "funcs_mean": 3000.0,
+          "ref_mean": 0.2871426562260542
+        },
+        "Simulated Annealing": {
+          "best_mean": 0.3093845848590075,
+          "best_std": 0.13749534636673927,
+          "final_mean": 0.7459026963172762,
+          "time_mean": 0.007655096054077148,
+          "funcs_mean": 200.0,
+          "ref_mean": 0.2871426562260542
+        },
+        "Random Search": {
+          "best_mean": 0.397731758827648,
+          "best_std": 0.16715397587048486,
+          "final_mean": 1.5363228326310667,
+          "time_mean": 0.01787252426147461,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.2871426562260542
+        }
+      }
+    },
+    {
+      "N": 20,
+      "methods": {
+        "XY-QAOA": {
+          "best_mean": 0.15156734668488406,
+          "best_std": 0.0831082708435657,
+          "final_mean": 0.24786922354705937,
+          "time_mean": 0.037219810485839847,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.24099289758588394
+        },
+        "Classical SOP": {
+          "best_mean": 0.20215160466317256,
+          "best_std": 0.1209000880791585,
+          "final_mean": 0.7435635832160542,
+          "time_mean": 0.2221320629119873,
+          "funcs_mean": 3000.0,
+          "ref_mean": 0.24099289758588394
+        },
+        "Simulated Annealing": {
+          "best_mean": 0.5839814856247127,
+          "best_std": 0.3229262736945053,
+          "final_mean": 0.8758098412061596,
+          "time_mean": 0.007722806930541992,
+          "funcs_mean": 200.0,
+          "ref_mean": 0.24099289758588394
+        },
+        "Random Search": {
+          "best_mean": 0.4993764301254802,
+          "best_std": 0.29488805209206714,
+          "final_mean": 1.7391531500840631,
+          "time_mean": 0.017668485641479492,
+          "funcs_mean": 500.0,
+          "ref_mean": 0.24099289758588394
+        }
+      }
+    }
+  ],
+  "configs": {
+    "XY-QAOA": {
+      "n_layers": 3,
+      "n_iter": 100,
+      "n_samples": 5
+    },
+    "Classical SOP": {
+      "n_perms": 100,
+      "n_swap_iters": 30
+    },
+    "Simulated Annealing": {
+      "n_iters": 200
+    },
+    "Random Search": {
+      "n_candidates": 500
+    }
+  },
+  "N_values": [
+    8,
+    12,
+    16,
+    20
+  ],
+  "seeds": [
+    42,
+    123,
+    456,
+    789,
+    1000
+  ]
+}
