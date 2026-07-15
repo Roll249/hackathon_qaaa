@@ -1,0 +1,18 @@
+{
+  "qaoa_sop": {
+    "classical_time": 0.383115291595459,
+    "quantum_time": 0.3805398941040039,
+    "classical_r2": 0.15358313267467572,
+    "quantum_r2": 0.8399745197351571,
+    "speedup_measured": 1.0067677463818057,
+    "speedup_theoretical": 7.2,
+    "n_perms_classical": 720,
+    "n_perms_quantum": 100
+  },
+  "quantum_kernel": {
+    "classical_acc": 0.4666666666666667,
+    "quantum_kernel_acc": 0.3333333333333333,
+    "quantum_feature_acc": 0.37777777777777777,
+    "improvement": -0.0888888888888889
+  }
+}
