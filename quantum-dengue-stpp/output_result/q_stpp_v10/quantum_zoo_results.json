@@ -1,0 +1,60 @@
+{
+  "results": {
+    "GAS": {
+      "algorithm": "Grover Adaptive Search",
+      "n_qubits": 8,
+      "n_iterations": 16,
+      "found_patterns": 30,
+      "oracle_type": "threshold-based (penalty-free)",
+      "total_candidates": 60,
+      "feasibility_rate": 0.5
+    },
+    "QBOOT": {
+      "avg_l_distance": 1.094148029763315,
+      "n_resamples_total": 200,
+      "std_l_distance": 0.8921040777397005
+    },
+    "Classical_Bootstrap": {
+      "avg_l_distance": 1.435244338058783,
+      "std_l_distance": 1.2613178808258625
+    },
+    "QAE": {
+      "mean_K_estimates": [
+        31.901045055537413,
+        31.901251945514204,
+        23.35641559962939,
+        26.77435119996534,
+        30.192169017438296,
+        33.610079416515774,
+        31.3314299645486,
+        25.065660936908053,
+        28.483260665637683,
+        27.91357863258326
+      ],
+      "avg_K": 29.0529242434278
+    },
+    "QFT_symmetric": {
+      "permutation_diversity": 9.644444444444444
+    },
+    "Classical_random_perms": {
+      "permutation_diversity": 10.977777777777778
+    },
+    "TSQS": {
+      "algorithm_type": "Two-Step Search (feasible + best)",
+      "n_patterns": 10,
+      "n_perms_per_pattern": 8
+    }
+  },
+  "timings": {
+    "GAS": 0.006072998046875,
+    "QBOOT": 0.04934430122375488,
+    "Classical_Bootstrap": 0.03157639503479004,
+    "QAE": 0.06329631805419922,
+    "QFT_symmetric": 0.0033495426177978516,
+    "TSQS": 0.0337526798248291
+  },
+  "config": {
+    "n_per_class": 20,
+    "grid_size": 12
+  }
+}
