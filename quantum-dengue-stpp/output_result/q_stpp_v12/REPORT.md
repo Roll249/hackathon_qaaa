@@ -86,9 +86,11 @@ Both are then fed to SVM-RBF and KNN-k=3 classifiers (best of the two is reporte
 - v9 Hilbert projection (best): **0.5400**
 
 | Feature map | Layers | Anchor-SVM | Anchor-KNN | Nyström-SVM | Nyström-KNN | Hybrid-SVM | Hybrid-KNN | Precomp-KSVM |
-|-------------|--------|------------|------------|-------------|------------|--------------|
+|-------------|--------|------------|------------|-------------|------------|------------|------------|--------------|
 | iqp | 2 | 0.733 | 0.673 | 0.673 | 0.627 | 0.760 | 0.660 | 0.687 |
 | iqp | 3 | 0.740 | 0.673 | 0.613 | 0.653 | 0.753 | 0.673 | - |
+| higher_order_iqp | 2 | 0.340 | 0.280 | 0.353 | 0.327 | 0.553 | 0.553 | 0.360 |
+| higher_order_iqp | 3 | 0.340 | 0.313 | 0.340 | 0.307 | 0.573 | 0.580 | - |
 | reuploading | 2 | 0.713 | 0.567 | 0.613 | 0.613 | 0.760 | 0.593 | 0.680 |
 | reuploading | 3 | 0.733 | 0.607 | 0.593 | 0.633 | 0.753 | 0.640 | - |
 | higher_order_reuploading | 2 | 0.507 | 0.453 | 0.500 | 0.487 | 0.627 | 0.633 | 0.560 |
@@ -100,9 +102,11 @@ Both are then fed to SVM-RBF and KNN-k=3 classifiers (best of the two is reporte
 - v9 Hilbert projection (best): **0.3767**
 
 | Feature map | Layers | Anchor-SVM | Anchor-KNN | Nyström-SVM | Nyström-KNN | Hybrid-SVM | Hybrid-KNN | Precomp-KSVM |
-|-------------|--------|------------|------------|-------------|------------|--------------|
+|-------------|--------|------------|------------|-------------|------------|------------|------------|--------------|
 | iqp | 2 | 0.703 | 0.670 | 0.623 | 0.617 | 0.720 | 0.643 | 0.683 |
 | iqp | 3 | 0.693 | 0.677 | 0.623 | 0.633 | 0.723 | 0.657 | - |
+| higher_order_iqp | 2 | 0.367 | 0.373 | 0.363 | 0.300 | 0.637 | 0.667 | 0.327 |
+| higher_order_iqp | 3 | 0.357 | 0.340 | 0.340 | 0.357 | 0.683 | 0.620 | - |
 | reuploading | 2 | 0.683 | 0.680 | 0.613 | 0.643 | 0.703 | 0.683 | 0.687 |
 | reuploading | 3 | 0.703 | 0.663 | 0.653 | 0.647 | 0.690 | 0.663 | - |
 | higher_order_reuploading | 2 | 0.510 | 0.513 | 0.580 | 0.540 | 0.687 | 0.673 | 0.590 |
@@ -114,9 +118,11 @@ Both are then fed to SVM-RBF and KNN-k=3 classifiers (best of the two is reporte
 - v9 Hilbert projection (best): **0.3550**
 
 | Feature map | Layers | Anchor-SVM | Anchor-KNN | Nyström-SVM | Nyström-KNN | Hybrid-SVM | Hybrid-KNN | Precomp-KSVM |
-|-------------|--------|------------|------------|-------------|------------|--------------|
+|-------------|--------|------------|------------|-------------|------------|------------|------------|--------------|
 | iqp | 2 | 0.660 | 0.635 | 0.638 | 0.617 | 0.678 | 0.652 | - |
 | iqp | 3 | 0.670 | 0.645 | 0.635 | 0.655 | 0.675 | 0.665 | - |
+| higher_order_iqp | 2 | 0.423 | 0.373 | 0.442 | 0.365 | 0.673 | 0.623 | - |
+| higher_order_iqp | 3 | 0.320 | 0.307 | 0.308 | 0.320 | 0.643 | 0.612 | - |
 | reuploading | 2 | 0.683 | 0.678 | 0.620 | 0.655 | 0.683 | 0.655 | - |
 | reuploading | 3 | 0.672 | 0.665 | 0.650 | 0.658 | 0.687 | 0.682 | - |
 | higher_order_reuploading | 2 | 0.457 | 0.482 | 0.490 | 0.505 | 0.625 | 0.642 | - |
@@ -128,9 +134,11 @@ Both are then fed to SVM-RBF and KNN-k=3 classifiers (best of the two is reporte
 - v9 Hilbert projection (best): **0.3333**
 
 | Feature map | Layers | Anchor-SVM | Anchor-KNN | Nyström-SVM | Nyström-KNN | Hybrid-SVM | Hybrid-KNN | Precomp-KSVM |
-|-------------|--------|------------|------------|-------------|------------|--------------|
+|-------------|--------|------------|------------|-------------|------------|------------|------------|--------------|
 | iqp | 2 | 0.677 | 0.648 | 0.660 | 0.613 | 0.699 | 0.684 | - |
 | iqp | 3 | 0.682 | 0.645 | 0.657 | 0.617 | 0.701 | 0.676 | - |
+| higher_order_iqp | 2 | 0.410 | 0.346 | 0.414 | 0.357 | 0.648 | 0.624 | - |
+| higher_order_iqp | 3 | 0.318 | 0.319 | 0.332 | 0.313 | 0.647 | 0.647 | - |
 | reuploading | 2 | 0.682 | 0.635 | 0.674 | 0.643 | 0.709 | 0.673 | - |
 | reuploading | 3 | 0.677 | 0.652 | 0.656 | 0.658 | 0.695 | 0.677 | - |
 | higher_order_reuploading | 2 | 0.570 | 0.573 | 0.577 | 0.563 | 0.678 | 0.680 | - |
@@ -189,7 +197,7 @@ Three reasons, in order of importance:
 
 ## 6. Verdict
 
-> **Quantum kernel alone BEATS classical K** at N=1200 (0.7092 vs 0.6792). Honest quantum advantage demonstrated on a proper feature map.
+> **Quantum kernel alone BEATS classical K** at N=1200 (0.7092 vs 0.6792, Δ = +0.0300). Honest quantum advantage demonstrated on a proper feature map.
 
 ## 7. Files & reproduction
 
