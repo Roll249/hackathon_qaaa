@@ -1,0 +1,18 @@
+{
+  "config": {
+    "n_per_class": 200,
+    "grid_size": 12
+  },
+  "results": {
+    "classical_k": 0.7133333333333333,
+    "quantum_kernel": 0.375,
+    "quantum_kfeature": 0.3383333333333334,
+    "qaoa_sop": 0.8483333333333333,
+    "concat_classical_quantum": 0.675,
+    "concat_all": 0.8333333333333334,
+    "weighted_ensemble": 0.8466666666666667
+  },
+  "best_individual": 0.8483333333333333,
+  "best_method": "qaoa_sop",
+  "hybrid_advantage": -0.014999999999999902
+}
