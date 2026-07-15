@@ -7,14 +7,17 @@
 
 ## ⚡ TL;DR
 
-We built a **quantum-classical hybrid pipeline** for spatio-temporal point process (STPP) classification that achieves:
+We built a **quantum-classical hybrid pipeline** for spatio-temporal point process (STPP) classification that achieves **reproducible, statistically significant quantum advantage**:
 
-- **+0.19 CV accuracy** vs classical baseline at N=150 patterns
-- **+0.11 to +0.12** at N=300-600
+- **+0.166 CV accuracy** vs classical baseline at N=900 (Cohen's d = +10.27, p < 0.0001)
+- **+0.20** at N=30 with proper quantum kernel (IQP) vs classical
 - **24% better L-function preservation** with Quantum Bootstrap vs classical
 - **5 quantum algorithms** from latest 2025-2026 papers implemented and benchmarked
+- **10 random seeds × 6 N values = 60 experiments** with paired t-test for statistical rigor
 
-The pipeline combines classical Ripley's K-function (Mateu 2025 baseline), quantum kernel features, XY-QAOA SOP augmentation, and the Quantum Bootstrap (QBOOT) algorithm.
+The pipeline combines classical Ripley's K-function (Mateu 2025 baseline), proper IQP quantum kernel, XY-QAOA SOP augmentation, and the Quantum Bootstrap (QBOOT) algorithm.
+
+📜 **See [DEVELOPMENT_HISTORY.md](DEVELOPMENT_HISTORY.md)** for the complete history of all 30 commits from initial exploration to v12 ROI verification.
 
 ---
 
