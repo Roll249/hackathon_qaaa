@@ -1,0 +1,483 @@
+{
+  "runs": [
+    {
+      "seed": 1,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0003954235134173819,
+        "std_error": 0.0010444440001097818,
+        "diversity": 0.9666666666666668,
+        "time": 0.12383151054382324
+      },
+      "grover": {
+        "mean_error": 0.0,
+        "std_error": 0.0,
+        "diversity": 0.9696296296296296,
+        "time": 0.11937141418457031
+      },
+      "qaoa": {
+        "mean_error": 0.0,
+        "std_error": 0.0,
+        "diversity": 0.9681481481481481,
+        "time": 0.1543715000152588
+      }
+    },
+    {
+      "seed": 2,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.00020133190893267526,
+        "std_error": 0.00013180267321342005,
+        "diversity": 0.9651851851851851,
+        "time": 0.1170039176940918
+      },
+      "grover": {
+        "mean_error": 0.0003347588129542102,
+        "std_error": 0.0006490399273847827,
+        "diversity": 0.9718518518518521,
+        "time": 0.11473894119262695
+      },
+      "qaoa": {
+        "mean_error": 5.7523402552192926e-05,
+        "std_error": 7.045149226079214e-05,
+        "diversity": 0.9585185185185185,
+        "time": 0.14706778526306152
+      }
+    },
+    {
+      "seed": 3,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0002997772190258699,
+        "std_error": 0.00022766928009208058,
+        "diversity": 0.9548148148148147,
+        "time": 0.11847352981567383
+      },
+      "grover": {
+        "mean_error": 1.4380850638048231e-05,
+        "std_error": 4.3142551914144704e-05,
+        "diversity": 0.9644444444444445,
+        "time": 0.1125953197479248
+      },
+      "qaoa": {
+        "mean_error": 2.4867749702198827e-05,
+        "std_error": 2.5810408243494205e-05,
+        "diversity": 0.9666666666666667,
+        "time": 0.147963285446167
+      }
+    },
+    {
+      "seed": 4,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 7.920709145701543e-05,
+        "std_error": 6.737508522508632e-05,
+        "diversity": 0.971111111111111,
+        "time": 0.12183547019958496
+      },
+      "grover": {
+        "mean_error": 0.0002205467405303677,
+        "std_error": 0.0006510494058631385,
+        "diversity": 0.9637037037037037,
+        "time": 0.11478662490844727
+      },
+      "qaoa": {
+        "mean_error": 1.2835221376010739e-05,
+        "std_error": 1.6707589281649167e-05,
+        "diversity": 0.9674074074074072,
+        "time": 0.14316129684448242
+      }
+    },
+    {
+      "seed": 5,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0002427062607856371,
+        "std_error": 0.00014383269404414086,
+        "diversity": 0.9703703703703704,
+        "time": 0.12030887603759766
+      },
+      "grover": {
+        "mean_error": 7.621973488508169e-05,
+        "std_error": 5.932244472284447e-05,
+        "diversity": 0.962962962962963,
+        "time": 0.12218046188354492
+      },
+      "qaoa": {
+        "mean_error": 3.172742406722219e-05,
+        "std_error": 2.178522517269357e-05,
+        "diversity": 0.9681481481481481,
+        "time": 0.14412450790405273
+      }
+    },
+    {
+      "seed": 1,
+      "n_events": 60,
+      "n_events_target": 60,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 8.16552515875212e-05,
+        "std_error": 6.154615380749945e-05,
+        "diversity": 0.9877777777777779,
+        "time": 0.14972829818725586
+      },
+      "grover": {
+        "mean_error": 3.901004461193178e-06,
+        "std_error": 4.859295201835763e-06,
+        "diversity": 0.9807407407407407,
+        "time": 0.15192699432373047
+      },
+      "qaoa": {
+        "mean_error": 1.7590441185100876e-05,
+        "std_error": 9.82427008732874e-06,
+        "diversity": 0.9837037037037036,
+        "time": 0.2141256332397461
+      }
+    },
+    {
+      "seed": 2,
+      "n_events": 60,
+      "n_events_target": 60,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 3.4917652470115796e-05,
+        "std_error": 2.351321861531132e-05,
+        "diversity": 0.978888888888889,
+        "time": 0.15499353408813477
+      },
+      "grover": {
+        "mean_error": 5.578194430735854e-06,
+        "std_error": 4.873128365912022e-06,
+        "diversity": 0.9837037037037036,
+        "time": 0.1558690071105957
+      },
+      "qaoa": {
+        "mean_error": 1.873348442760479e-05,
+        "std_error": 1.171533801463204e-05,
+        "diversity": 0.984074074074074,
+        "time": 0.22681808471679688
+      }
+    },
+    {
+      "seed": 3,
+      "n_events": 60,
+      "n_events_target": 60,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.00020016561750689512,
+        "std_error": 0.00023378810951927686,
+        "diversity": 0.982962962962963,
+        "time": 0.1608593463897705
+      },
+      "grover": {
+        "mean_error": 2.8305504271450945e-06,
+        "std_error": 5.005899373041923e-06,
+        "diversity": 0.978888888888889,
+        "time": 0.15415048599243164
+      },
+      "qaoa": {
+        "mean_error": 2.1579386465221368e-05,
+        "std_error": 1.1282586762902199e-05,
+        "diversity": 0.9814814814814816,
+        "time": 0.21892642974853516
+      }
+    },
+    {
+      "seed": 4,
+      "n_events": 60,
+      "n_events_target": 60,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 4.8595573549107315e-05,
+        "std_error": 4.075659574897953e-05,
+        "diversity": 0.9844444444444447,
+        "time": 0.15212059020996094
+      },
+      "grover": {
+        "mean_error": 3.137032692003158e-06,
+        "std_error": 5.03906984416848e-06,
+        "diversity": 0.9837037037037039,
+        "time": 0.14806008338928223
+      },
+      "qaoa": {
+        "mean_error": 1.66441051045121e-05,
+        "std_error": 9.941642959721866e-06,
+        "diversity": 0.9848148148148149,
+        "time": 0.21882343292236328
+      }
+    },
+    {
+      "seed": 5,
+      "n_events": 60,
+      "n_events_target": 60,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 3.8977168037409274e-05,
+        "std_error": 3.07027760583211e-05,
+        "diversity": 0.9833333333333335,
+        "time": 0.15025997161865234
+      },
+      "grover": {
+        "mean_error": 6.889464368383891e-06,
+        "std_error": 7.766524340325629e-06,
+        "diversity": 0.9859259259259261,
+        "time": 0.14744067192077637
+      },
+      "qaoa": {
+        "mean_error": 1.2265239022306317e-05,
+        "std_error": 8.984153049323951e-06,
+        "diversity": 0.9829629629629631,
+        "time": 0.2125852108001709
+      }
+    },
+    {
+      "seed": 1,
+      "n_events": 120,
+      "n_events_target": 120,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 3.9951542083040346e-05,
+        "std_error": 2.924323788325263e-05,
+        "diversity": 0.9912962962962963,
+        "time": 0.25289320945739746
+      },
+      "grover": {
+        "mean_error": 1.4215502589674788e-06,
+        "std_error": 1.43213097321051e-06,
+        "diversity": 0.9892592592592594,
+        "time": 0.25463294982910156
+      },
+      "qaoa": {
+        "mean_error": 1.1290281495793802e-05,
+        "std_error": 5.146867523241362e-06,
+        "diversity": 0.9905555555555556,
+        "time": 0.3911550045013428
+      }
+    },
+    {
+      "seed": 2,
+      "n_events": 120,
+      "n_events_target": 120,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.00010804332060949484,
+        "std_error": 7.578511744991136e-05,
+        "diversity": 0.9894444444444447,
+        "time": 0.25490283966064453
+      },
+      "grover": {
+        "mean_error": 4.272329216765418e-06,
+        "std_error": 5.0005526722047205e-06,
+        "diversity": 0.9927777777777778,
+        "time": 0.2531747817993164
+      },
+      "qaoa": {
+        "mean_error": 8.133770998490776e-05,
+        "std_error": 4.844278501297389e-05,
+        "diversity": 0.9901851851851853,
+        "time": 0.3905301094055176
+      }
+    },
+    {
+      "seed": 3,
+      "n_events": 120,
+      "n_events_target": 120,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 2.4426055831480216e-05,
+        "std_error": 2.2505297287164567e-05,
+        "diversity": 0.9925925925925927,
+        "time": 0.2624850273132324
+      },
+      "grover": {
+        "mean_error": 1.0469745971026e-06,
+        "std_error": 8.628369693296714e-07,
+        "diversity": 0.9912962962962965,
+        "time": 0.24748897552490234
+      },
+      "qaoa": {
+        "mean_error": 6.994258512700753e-06,
+        "std_error": 4.021635993062432e-06,
+        "diversity": 0.9898148148148149,
+        "time": 0.3883810043334961
+      }
+    },
+    {
+      "seed": 4,
+      "n_events": 120,
+      "n_events_target": 120,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0004983817827610492,
+        "std_error": 0.00018937600083795538,
+        "diversity": 0.9937037037037038,
+        "time": 0.2560861110687256
+      },
+      "grover": {
+        "mean_error": 6.841940836550146e-05,
+        "std_error": 0.0001341998025750107,
+        "diversity": 0.9914814814814815,
+        "time": 0.25134921073913574
+      },
+      "qaoa": {
+        "mean_error": 0.00037767607385916533,
+        "std_error": 0.0001296778092164546,
+        "diversity": 0.9927777777777779,
+        "time": 0.3923969268798828
+      }
+    },
+    {
+      "seed": 5,
+      "n_events": 120,
+      "n_events_target": 120,
+      "n_events_available": 444,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 5.104370276843877e-05,
+        "std_error": 4.8377069238915614e-05,
+        "diversity": 0.9931481481481482,
+        "time": 0.2590017318725586
+      },
+      "grover": {
+        "mean_error": 9.189499864448752e-07,
+        "std_error": 8.454192706351728e-07,
+        "diversity": 0.992037037037037,
+        "time": 0.2552785873413086
+      },
+      "qaoa": {
+        "mean_error": 8.004294336813084e-06,
+        "std_error": 3.213717849484145e-06,
+        "diversity": 0.990925925925926,
+        "time": 0.4094095230102539
+      }
+    }
+  ],
+  "aggregate": {
+    "30": {
+      "n_events_target": 30,
+      "n_seeds": 5,
+      "mh": {
+        "mean_error": 0.00024368919872371593,
+        "std_error": 0.00010489865399832161,
+        "mean_diversity": 0.9656296296296297,
+        "mean_time": 0.12029066085815429
+      },
+      "grover": {
+        "mean_error": 0.00012918122780154157,
+        "std_error": 0.0001290593943721559,
+        "mean_diversity": 0.9665185185185186,
+        "mean_time": 0.11673455238342285
+      },
+      "qaoa": {
+        "mean_error": 2.5390759539524936e-05,
+        "std_error": 1.936628933056364e-05,
+        "mean_diversity": 0.9657777777777777,
+        "mean_time": 0.1473376750946045
+      }
+    },
+    "60": {
+      "n_events_target": 60,
+      "n_seeds": 5,
+      "mh": {
+        "mean_error": 8.086225263020975e-05,
+        "std_error": 6.187136153728255e-05,
+        "mean_diversity": 0.9834814814814816,
+        "mean_time": 0.15359234809875488
+      },
+      "grover": {
+        "mean_error": 4.467249275892235e-06,
+        "std_error": 1.540793144006176e-06,
+        "mean_diversity": 0.9825925925925926,
+        "mean_time": 0.1514894485473633
+      },
+      "qaoa": {
+        "mean_error": 1.736253124094909e-05,
+        "std_error": 3.040126564499216e-06,
+        "mean_diversity": 0.9834074074074074,
+        "mean_time": 0.21825575828552246
+      }
+    },
+    "120": {
+      "n_events_target": 120,
+      "n_seeds": 5,
+      "mh": {
+        "mean_error": 0.0001443692808107007,
+        "std_error": 0.0001792448224178435,
+        "mean_diversity": 0.992037037037037,
+        "mean_time": 0.25707378387451174
+      },
+      "grover": {
+        "mean_error": 1.5215842484956365e-05,
+        "std_error": 2.6630134642581133e-05,
+        "mean_diversity": 0.9913703703703705,
+        "mean_time": 0.25238490104675293
+      },
+      "qaoa": {
+        "mean_error": 9.706052363787615e-05,
+        "std_error": 0.00014310260125042883,
+        "mean_diversity": 0.990851851851852,
+        "mean_time": 0.39437451362609866
+      }
+    }
+  },
+  "config": {
+    "data_path": "C:\\Users\\ezycloudx-admin\\hackathon_qaaa\\quantum-dengue-stpp\\..\\dengue_dataset\\sea_dengue_admin1_month.csv",
+    "country": "CAMBODIA",
+    "year_start": 2005,
+    "year_end": 2006,
+    "jitter_deg": 1.5,
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "max_events": [
+      30,
+      60,
+      120
+    ],
+    "n_perms": 10,
+    "evals_per_perm": 200
+  }
+}

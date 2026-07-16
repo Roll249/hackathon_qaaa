@@ -1,0 +1,484 @@
+{
+  "runs": [
+    {
+      "seed": 1,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0005191777744159544,
+        "std_error": 0.0006277686213109718,
+        "diversity": 0.9651851851851851,
+        "time": 0.1172642707824707
+      },
+      "grover": {
+        "mean_error": 1.4380850638048231e-05,
+        "std_error": 4.31425519141447e-05,
+        "diversity": 0.9711111111111111,
+        "time": 0.11421513557434082
+      },
+      "qaoa": {
+        "mean_error": 2.8305503023254802e-05,
+        "std_error": 3.466701965989044e-05,
+        "diversity": 0.9740740740740741,
+        "time": 0.14620494842529297
+      }
+    },
+    {
+      "seed": 2,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0038551187954729226,
+        "std_error": 0.003646797878351908,
+        "diversity": 0.9622222222222223,
+        "time": 0.12387967109680176
+      },
+      "grover": {
+        "mean_error": 7.0763757558137005e-06,
+        "std_error": 2.1229127267441102e-05,
+        "diversity": 0.9711111111111114,
+        "time": 0.11917304992675781
+      },
+      "qaoa": {
+        "mean_error": 0.0006385911936612943,
+        "std_error": 0.0009754641610283618,
+        "diversity": 0.9651851851851851,
+        "time": 0.14896869659423828
+      }
+    },
+    {
+      "seed": 3,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0004413671261007314,
+        "std_error": 0.0006413042487642693,
+        "diversity": 0.9711111111111111,
+        "time": 0.1325230598449707
+      },
+      "grover": {
+        "mean_error": 0.0008656076763933533,
+        "std_error": 0.0010608568362233304,
+        "diversity": 0.9592592592592593,
+        "time": 0.11383318901062012
+      },
+      "qaoa": {
+        "mean_error": 0.00024116923424368628,
+        "std_error": 0.0006308340405965763,
+        "diversity": 0.9600000000000001,
+        "time": 0.14748644828796387
+      }
+    },
+    {
+      "seed": 4,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0002036888144588443,
+        "std_error": 0.00015968567462970913,
+        "diversity": 0.9666666666666668,
+        "time": 0.11682343482971191
+      },
+      "grover": {
+        "mean_error": 7.0763757558137005e-06,
+        "std_error": 2.1229127267441102e-05,
+        "diversity": 0.9688888888888889,
+        "time": 0.11639547348022461
+      },
+      "qaoa": {
+        "mean_error": 4.106164672785543e-05,
+        "std_error": 4.428910959489719e-05,
+        "diversity": 0.9696296296296297,
+        "time": 0.14746642112731934
+      }
+    },
+    {
+      "seed": 5,
+      "n_events": 30,
+      "n_events_target": 30,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.00017278015431937527,
+        "std_error": 0.00013112898381174122,
+        "diversity": 0.9696296296296296,
+        "time": 0.11593008041381836
+      },
+      "grover": {
+        "mean_error": 4.1061646727855424e-05,
+        "std_error": 5.4183819111759336e-05,
+        "diversity": 0.9733333333333334,
+        "time": 0.11256670951843262
+      },
+      "qaoa": {
+        "mean_error": 2.8305503023254802e-05,
+        "std_error": 4.6939366515203304e-05,
+        "diversity": 0.9555555555555557,
+        "time": 0.1468808650970459
+      }
+    },
+    {
+      "seed": 1,
+      "n_events": 30,
+      "n_events_target": 60,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0005191777744159544,
+        "std_error": 0.0006277686213109718,
+        "diversity": 0.9651851851851851,
+        "time": 0.11751008033752441
+      },
+      "grover": {
+        "mean_error": 1.4380850638048231e-05,
+        "std_error": 4.31425519141447e-05,
+        "diversity": 0.9711111111111111,
+        "time": 0.11279034614562988
+      },
+      "qaoa": {
+        "mean_error": 2.8305503023254802e-05,
+        "std_error": 3.466701965989044e-05,
+        "diversity": 0.9740740740740741,
+        "time": 0.14162564277648926
+      }
+    },
+    {
+      "seed": 2,
+      "n_events": 30,
+      "n_events_target": 60,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0038551187954729226,
+        "std_error": 0.003646797878351908,
+        "diversity": 0.9622222222222223,
+        "time": 0.11731338500976562
+      },
+      "grover": {
+        "mean_error": 7.0763757558137005e-06,
+        "std_error": 2.1229127267441102e-05,
+        "diversity": 0.9711111111111114,
+        "time": 0.1166524887084961
+      },
+      "qaoa": {
+        "mean_error": 0.0006385911936612943,
+        "std_error": 0.0009754641610283618,
+        "diversity": 0.9651851851851851,
+        "time": 0.1406574249267578
+      }
+    },
+    {
+      "seed": 3,
+      "n_events": 30,
+      "n_events_target": 60,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0004413671261007314,
+        "std_error": 0.0006413042487642693,
+        "diversity": 0.9711111111111111,
+        "time": 0.11571931838989258
+      },
+      "grover": {
+        "mean_error": 0.0008656076763933533,
+        "std_error": 0.0010608568362233304,
+        "diversity": 0.9592592592592593,
+        "time": 0.11194753646850586
+      },
+      "qaoa": {
+        "mean_error": 0.00024116923424368628,
+        "std_error": 0.0006308340405965763,
+        "diversity": 0.9600000000000001,
+        "time": 0.14671564102172852
+      }
+    },
+    {
+      "seed": 4,
+      "n_events": 30,
+      "n_events_target": 60,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0002036888144588443,
+        "std_error": 0.00015968567462970913,
+        "diversity": 0.9666666666666668,
+        "time": 0.11591124534606934
+      },
+      "grover": {
+        "mean_error": 7.0763757558137005e-06,
+        "std_error": 2.1229127267441102e-05,
+        "diversity": 0.9688888888888889,
+        "time": 0.11287903785705566
+      },
+      "qaoa": {
+        "mean_error": 4.106164672785543e-05,
+        "std_error": 4.428910959489719e-05,
+        "diversity": 0.9696296296296297,
+        "time": 0.14424514770507812
+      }
+    },
+    {
+      "seed": 5,
+      "n_events": 30,
+      "n_events_target": 60,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.00017278015431937527,
+        "std_error": 0.00013112898381174122,
+        "diversity": 0.9696296296296296,
+        "time": 0.12453007698059082
+      },
+      "grover": {
+        "mean_error": 4.1061646727855424e-05,
+        "std_error": 5.4183819111759336e-05,
+        "diversity": 0.9733333333333334,
+        "time": 0.1133427619934082
+      },
+      "qaoa": {
+        "mean_error": 2.8305503023254802e-05,
+        "std_error": 4.6939366515203304e-05,
+        "diversity": 0.9555555555555557,
+        "time": 0.14281988143920898
+      }
+    },
+    {
+      "seed": 1,
+      "n_events": 30,
+      "n_events_target": 120,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0005191777744159544,
+        "std_error": 0.0006277686213109718,
+        "diversity": 0.9651851851851851,
+        "time": 0.11515641212463379
+      },
+      "grover": {
+        "mean_error": 1.4380850638048231e-05,
+        "std_error": 4.31425519141447e-05,
+        "diversity": 0.9711111111111111,
+        "time": 0.12154316902160645
+      },
+      "qaoa": {
+        "mean_error": 2.8305503023254802e-05,
+        "std_error": 3.466701965989044e-05,
+        "diversity": 0.9740740740740741,
+        "time": 0.14623451232910156
+      }
+    },
+    {
+      "seed": 2,
+      "n_events": 30,
+      "n_events_target": 120,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0038551187954729226,
+        "std_error": 0.003646797878351908,
+        "diversity": 0.9622222222222223,
+        "time": 0.11980676651000977
+      },
+      "grover": {
+        "mean_error": 7.0763757558137005e-06,
+        "std_error": 2.1229127267441102e-05,
+        "diversity": 0.9711111111111114,
+        "time": 0.11540484428405762
+      },
+      "qaoa": {
+        "mean_error": 0.0006385911936612943,
+        "std_error": 0.0009754641610283618,
+        "diversity": 0.9651851851851851,
+        "time": 0.14825034141540527
+      }
+    },
+    {
+      "seed": 3,
+      "n_events": 30,
+      "n_events_target": 120,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0004413671261007314,
+        "std_error": 0.0006413042487642693,
+        "diversity": 0.9711111111111111,
+        "time": 0.11967349052429199
+      },
+      "grover": {
+        "mean_error": 0.0008656076763933533,
+        "std_error": 0.0010608568362233304,
+        "diversity": 0.9592592592592593,
+        "time": 0.12216854095458984
+      },
+      "qaoa": {
+        "mean_error": 0.00024116923424368628,
+        "std_error": 0.0006308340405965763,
+        "diversity": 0.9600000000000001,
+        "time": 0.1466360092163086
+      }
+    },
+    {
+      "seed": 4,
+      "n_events": 30,
+      "n_events_target": 120,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.0002036888144588443,
+        "std_error": 0.00015968567462970913,
+        "diversity": 0.9666666666666668,
+        "time": 0.12092351913452148
+      },
+      "grover": {
+        "mean_error": 7.0763757558137005e-06,
+        "std_error": 2.1229127267441102e-05,
+        "diversity": 0.9688888888888889,
+        "time": 0.1174466609954834
+      },
+      "qaoa": {
+        "mean_error": 4.106164672785543e-05,
+        "std_error": 4.428910959489719e-05,
+        "diversity": 0.9696296296296297,
+        "time": 0.1419835090637207
+      }
+    },
+    {
+      "seed": 5,
+      "n_events": 30,
+      "n_events_target": 120,
+      "n_events_available": 30,
+      "evals_per_perm": 200,
+      "n_perms": 10,
+      "mh": {
+        "mean_error": 0.00017278015431937527,
+        "std_error": 0.00013112898381174122,
+        "diversity": 0.9696296296296296,
+        "time": 0.11829972267150879
+      },
+      "grover": {
+        "mean_error": 4.1061646727855424e-05,
+        "std_error": 5.4183819111759336e-05,
+        "diversity": 0.9733333333333334,
+        "time": 0.11666107177734375
+      },
+      "qaoa": {
+        "mean_error": 2.8305503023254802e-05,
+        "std_error": 4.6939366515203304e-05,
+        "diversity": 0.9555555555555557,
+        "time": 0.1513357162475586
+      }
+    }
+  ],
+  "aggregate": {
+    "30": {
+      "n_events_target": 30,
+      "n_seeds": 5,
+      "mh": {
+        "mean_error": 0.0010384265329535657,
+        "std_error": 0.0014146367181584807,
+        "mean_diversity": 0.9669629629629629,
+        "mean_time": 0.12128410339355469
+      },
+      "grover": {
+        "mean_error": 0.00018704058505417687,
+        "std_error": 0.00033951399530175735,
+        "mean_diversity": 0.9687407407407408,
+        "mean_time": 0.11523671150207519
+      },
+      "qaoa": {
+        "mean_error": 0.0001954866161358691,
+        "std_error": 0.00023587059526824518,
+        "mean_diversity": 0.9648888888888889,
+        "mean_time": 0.14740147590637206
+      }
+    },
+    "60": {
+      "n_events_target": 60,
+      "n_seeds": 5,
+      "mh": {
+        "mean_error": 0.0010384265329535657,
+        "std_error": 0.0014146367181584807,
+        "mean_diversity": 0.9669629629629629,
+        "mean_time": 0.11819682121276856
+      },
+      "grover": {
+        "mean_error": 0.00018704058505417687,
+        "std_error": 0.00033951399530175735,
+        "mean_diversity": 0.9687407407407408,
+        "mean_time": 0.11352243423461914
+      },
+      "qaoa": {
+        "mean_error": 0.0001954866161358691,
+        "std_error": 0.00023587059526824518,
+        "mean_diversity": 0.9648888888888889,
+        "mean_time": 0.14321274757385255
+      }
+    },
+    "120": {
+      "n_events_target": 120,
+      "n_seeds": 5,
+      "mh": {
+        "mean_error": 0.0010384265329535657,
+        "std_error": 0.0014146367181584807,
+        "mean_diversity": 0.9669629629629629,
+        "mean_time": 0.11877198219299316
+      },
+      "grover": {
+        "mean_error": 0.00018704058505417687,
+        "std_error": 0.00033951399530175735,
+        "mean_diversity": 0.9687407407407408,
+        "mean_time": 0.1186448574066162
+      },
+      "qaoa": {
+        "mean_error": 0.0001954866161358691,
+        "std_error": 0.00023587059526824518,
+        "mean_diversity": 0.9648888888888889,
+        "mean_time": 0.14688801765441895
+      }
+    }
+  },
+  "config": {
+    "data_path": "C:\\Users\\ezycloudx-admin\\hackathon_qaaa\\quantum-dengue-stpp\\..\\dengue_dataset\\sea_dengue_admin1_month.csv",
+    "country": "TIMOR-LESTE",
+    "year_start": 2005,
+    "year_end": 2005,
+    "jitter_deg": 1.5,
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "max_events": [
+      30,
+      60,
+      120
+    ],
+    "n_perms": 10,
+    "evals_per_perm": 200,
+    "out_dir": "C:\\Users\\ezycloudx-admin\\hackathon_qaaa\\output_dataset\\timor_leste"
+  }
+}

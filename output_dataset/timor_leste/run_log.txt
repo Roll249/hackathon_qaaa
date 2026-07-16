@@ -1,0 +1,56 @@
+==============================================================================
+  Q-STPP v15 (REAL DATA): FAIR SOP COMPARISON
+  Country: TIMOR-LESTE  |  Years: 2005-2005
+  Event = one (region, month) record with dengue_total > 0.
+  Dates are real (day-of-month sampled within the report month).
+  Coordinates are a PROXY (country centroid + per-region jitter) --
+  this dataset has no true admin1 centroids. See module docstring.
+  All methods classical -- no quantum hardware, no quantum advantage claimed
+==============================================================================
+
+  30 real (region, month) events available for TIMOR-LESTE 2005-2005
+
+  N= 30 seed=1: mh: err=0.00052 div=0.97  grover: err=0.00001 div=0.97  qaoa: err=0.00003 div=0.97
+  N= 30 seed=2: mh: err=0.00386 div=0.96  grover: err=0.00001 div=0.97  qaoa: err=0.00064 div=0.97
+  N= 30 seed=3: mh: err=0.00044 div=0.97  grover: err=0.00087 div=0.96  qaoa: err=0.00024 div=0.96
+  N= 30 seed=4: mh: err=0.00020 div=0.97  grover: err=0.00001 div=0.97  qaoa: err=0.00004 div=0.97
+  N= 30 seed=5: mh: err=0.00017 div=0.97  grover: err=0.00004 div=0.97  qaoa: err=0.00003 div=0.96
+  N= 60 seed=1: mh: err=0.00052 div=0.97  grover: err=0.00001 div=0.97  qaoa: err=0.00003 div=0.97
+  N= 60 seed=2: mh: err=0.00386 div=0.96  grover: err=0.00001 div=0.97  qaoa: err=0.00064 div=0.97
+  N= 60 seed=3: mh: err=0.00044 div=0.97  grover: err=0.00087 div=0.96  qaoa: err=0.00024 div=0.96
+  N= 60 seed=4: mh: err=0.00020 div=0.97  grover: err=0.00001 div=0.97  qaoa: err=0.00004 div=0.97
+  N= 60 seed=5: mh: err=0.00017 div=0.97  grover: err=0.00004 div=0.97  qaoa: err=0.00003 div=0.96
+  N=120 seed=1: mh: err=0.00052 div=0.97  grover: err=0.00001 div=0.97  qaoa: err=0.00003 div=0.97
+  N=120 seed=2: mh: err=0.00386 div=0.96  grover: err=0.00001 div=0.97  qaoa: err=0.00064 div=0.97
+  N=120 seed=3: mh: err=0.00044 div=0.97  grover: err=0.00087 div=0.96  qaoa: err=0.00024 div=0.96
+  N=120 seed=4: mh: err=0.00020 div=0.97  grover: err=0.00001 div=0.97  qaoa: err=0.00004 div=0.97
+  N=120 seed=5: mh: err=0.00017 div=0.97  grover: err=0.00004 div=0.97  qaoa: err=0.00003 div=0.96
+
+==============================================================================
+  FAIR SOP COMPARISON â€” quality (L(r) error) AND diversity
+==============================================================================
+     N â”‚ method                       â”‚     L(r) err â”‚  diversity â”‚    t(s)
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    30 â”‚ Metropolis-Hastings          â”‚     0.001038 â”‚      0.967 â”‚    0.12
+    30 â”‚ Grover-inspired (greedy)     â”‚     0.000187 â”‚      0.969 â”‚    0.12
+    30 â”‚ QAOA-inspired (multi-swap)   â”‚     0.000195 â”‚      0.965 â”‚    0.15
+  Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·
+    60 â”‚ Metropolis-Hastings          â”‚     0.001038 â”‚      0.967 â”‚    0.12
+    60 â”‚ Grover-inspired (greedy)     â”‚     0.000187 â”‚      0.969 â”‚    0.11
+    60 â”‚ QAOA-inspired (multi-swap)   â”‚     0.000195 â”‚      0.965 â”‚    0.14
+  Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·
+   120 â”‚ Metropolis-Hastings          â”‚     0.001038 â”‚      0.967 â”‚    0.12
+   120 â”‚ Grover-inspired (greedy)     â”‚     0.000187 â”‚      0.969 â”‚    0.12
+   120 â”‚ QAOA-inspired (multi-swap)   â”‚     0.000195 â”‚      0.965 â”‚    0.15
+  Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·Â·
+
+  Reading the table:
+   â€¢ Lower L(r) error  = better preservation of second-order structure.
+   â€¢ Higher diversity  = more useful set for data augmentation.
+   â€¢ Greedy methods usually reach lower error but lower diversity;
+     the MH sampler trades a little error for much more diversity.
+   â€¢ These are classical heuristics under an identical budget â€”
+     no quantum hardware is involved and no quantum advantage is claimed.
+
+  Results: C:\Users\ezycloudx-admin\hackathon_qaaa\output_dataset\timor_leste\real_comparison_results.json
+  Plot:    C:\Users\ezycloudx-admin\hackathon_qaaa\output_dataset\timor_leste\real_comparison_plot.png
