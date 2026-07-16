@@ -1,0 +1,10 @@
+{
+  "n_samples_per_class": 25,
+  "n_qubits": 6,
+  "seed": 42,
+  "acc_classical_euclidean": 1.0,
+  "acc_quantum_kernel": 1.0,
+  "time_classical_s": 0.0014651530000264756,
+  "time_quantum_s": 1.7408581700001378,
+  "quantum_kernel_ran": true
+}
