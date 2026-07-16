@@ -2,6 +2,17 @@
 
 ## Tăng cường dữ liệu lượng tử cho dự báo dịch sốt xuất huyết tại Đông Nam Á bằng mô hình Spatio-Temporal Point Process
 
+> ⚠️ **Lưu ý trạng thái triển khai (đọc trước).** Đây là **ĐỀ XUẤT hướng nghiên
+> cứu** — mô tả mục tiêu và định hướng, **không** phải mô tả những gì đã hiện
+> thực. Bản code hiện tại trong `quantum-dengue-stpp/` chỉ gồm: **so sánh cổ điển**
+> ba thuật toán tìm hoán vị SOP (Metropolis-Hastings và hai heuristic
+> "quantum-inspired") trên **dữ liệu synthetic (Hawkes)**. Cụ thể, hiện tại **CHƯA**
+> có: mô hình sinh lượng tử (QGAN/QBM/VQC), mạch lượng tử thật, hay huấn luyện
+> trên dữ liệu dengue thật. Các mô hình lượng tử và nguồn dữ liệu liệt kê bên dưới
+> là **future work**. Dữ liệu dengue thực đang có trong repo là bộ
+> OpenDengue-derived tại `dengue_dataset/` (spatial 11 quốc gia, admin1-month 8
+> quốc gia), **chưa** được nối vào pipeline.
+
 ### 1. Bối cảnh
 
 Sốt xuất huyết (Dengue Fever) là một trong những bệnh truyền nhiễm phổ biến nhất tại khu vực Đông Nam Á. Các quốc gia như Việt Nam, Thái Lan, Indonesia, Malaysia và Philippines thường xuyên ghi nhận các đợt bùng phát dịch với quy mô lớn, gây áp lực đáng kể lên hệ thống y tế và công tác phòng chống dịch.
@@ -45,8 +56,15 @@ Các mô hình có thể được xem xét bao gồm:
 
 ### 4. Dữ liệu dự kiến
 
-Nguồn dữ liệu dự kiến:
+> **Trạng thái:** Danh sách nguồn dưới đây là **dự kiến/định hướng**, chưa được
+> tích hợp. Dữ liệu dengue **thực tế đang có trong repo** là bộ
+> **OpenDengue-derived** (`dengue_dataset/sea_dengue_*.csv`): tập spatial gồm 11
+> quốc gia Đông Nam Á và tập admin1-month gồm 8 quốc gia / 233 tỉnh–bang. Pipeline
+> v15 hiện tại **chưa** đọc bộ này (đang chạy trên dữ liệu synthetic Hawkes).
 
+Nguồn dữ liệu dự kiến (future work):
+
+* OpenDengue (đang có, chưa nối vào pipeline)
 * WHO Dengue Surveillance Data
 * ASEAN Dengue Dashboard
 * Bộ Y tế Việt Nam

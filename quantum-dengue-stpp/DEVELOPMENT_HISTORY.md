@@ -6,7 +6,22 @@
 **Authors**: Roll249 (Khang Le)
 **Branch**: master (default)
 
-This document records the COMPLETE development history of the Quantum-Dengue-STPP project, from initial exploratory commits through the current verified v12. It captures every major decision, what was kept, and what was archived.
+This document records the COMPLETE development history of the Quantum-Dengue-STPP
+project. It captures every major decision, what was kept, and what was archived —
+**including the claims that were later withdrawn**.
+
+> ⚠️ **Withdrawal banner (read first).** Several results reported in the history
+> below were later found to be over-stated or not backed by the code, and are
+> **withdrawn**:
+> - the v9–v12 "quantum kernel" classification advantage (+0.16 accuracy) — the
+>   "quantum kernel" was a classical random-Fourier projection, not quantum;
+> - the v15-initial "~33× better L(r) error" — an unfair comparison;
+> - all monetary ROI figures ("$165,000 / 10,000 cases") and the "R² ~0.97".
+>
+> The current, honest state is **v15 corrected**: a fair, fully classical
+> comparison of SOP permutation-search heuristics (see §11, §13, and
+> `Q_STPP_V15_REPORT.md`). Where the history text still reads as if an old claim
+> were current, treat this banner as authoritative.
 
 ---
 
@@ -106,18 +121,22 @@ This document records the COMPLETE development history of the Quantum-Dengue-STP
 | 24 | `f930c16` | 2026-07-16 00:06 | Roll249 | feat: Quantum Advantage x100 honest proof script | archived |
 | 25 | `30048e1` | 2026-07-16 00:11 | Roll249 | **feat: v7 — XY-Mixer QAOA SOP + Quantum Kernel K-function** | archived (in v9) |
 | 26 | `785e37c` | 2026-07-16 00:18 | Roll249 | **v8: Hybrid classical-quantum STPP pipeline** + project synthesis | archived |
-| 27 | `602b3fe` | 2026-07-16 00:24 | Roll249 | **v9: Hybrid quantum-classical wins at N≥150** (Mateu 2025 prediction) | **★ ACTIVE** |
-| 28 | `a3aab9a` | 2026-07-16 00:30 | Roll249 | **v10: Quantum Algorithm Zoo** — 5 quantum algorithms (2025-2026 papers) | **★ ACTIVE** |
-| 29 | `eea55fb` | 2026-07-16 00:33 | Roll249 | **v11: Consolidate to v9+v10** + new ARCHITECTURE.md + THEORY.md | **★ ACTIVE** |
-| 30 | `bf40d8f` | 2026-07-16 00:43 | Roll249 | **v12: ROI verified** — quantum advantage is REAL and reproducible | **★ ACTIVE (HEAD)** |
+| 27 | `602b3fe` | 2026-07-16 00:24 | Roll249 | v9: Hybrid quantum-classical "wins at N≥150" | **WITHDRAWN** (see banner) |
+| 28 | `a3aab9a` | 2026-07-16 00:30 | Roll249 | v10: "Quantum Algorithm Zoo" — 5 algorithms | **WITHDRAWN** |
+| 29 | `eea55fb` | 2026-07-16 00:33 | Roll249 | v11: Consolidate to v9+v10 + ARCHITECTURE/THEORY | superseded |
+| 30 | `bf40d8f` | 2026-07-16 00:43 | Roll249 | v12: "ROI verified — quantum advantage is REAL" | **WITHDRAWN** |
 
-**Phase 4 summary** (CURRENT PRODUCTION):
-- **v7**: XY-Mixer QAOA SOP permutation + Quantum Kernel K-function. Archived as standalone, but components used in v9.
-- **v8**: First linear hybrid (concatenated features). Archived because linear sum didn't decorrelate errors.
-- **v9**: **BREAKTHROUGH** — smart hybrid with decision voting achieves +0.19 over classical at N=150. **ACTIVE**
-- **v10**: Implemented 5 quantum algorithms from 2025-2026 papers (QBOOT, GAS, QAE, QFT-Symmetric, TSQS). **ACTIVE**
-- **v11**: Codebase consolidation — archived v6, v7, v8, main.py, prove_quantum_x100.py. Added ARCHITECTURE.md, THEORY.md.
-- **v12**: **VERIFICATION** — Added proper IQP quantum kernel (replaces fake Hilbert projection) + statistical significance test (10 seeds). **ACTIVE HEAD**
+Later commits (not in the table above): v13–v14 (superseded) and
+**`f824dd3` v15** — consolidation to the corrected fair comparison, the current
+state (see §11).
+
+**Phase 4 summary** — all WITHDRAWN or superseded (see the banner at the top):
+- **v7**: XY-Mixer QAOA SOP + a "Quantum Kernel K-function". Archived.
+- **v8**: First linear hybrid. Archived.
+- **v9**: claimed "+0.19 over classical at N=150". **WITHDRAWN** — the "quantum kernel" was a classical random-Fourier projection.
+- **v10**: five "quantum algorithms" (QBOOT/GAS/QAE/QFT/TSQS), several with unverifiable citations. **WITHDRAWN**.
+- **v11**: codebase consolidation.
+- **v12**: claimed a "proper IQP quantum kernel" and "statistically significant" advantage. **WITHDRAWN** — the significance script still used the classical RFF, not the IQP kernel. See §9 and `Q_STPP_V15_REPORT.md`.
 
 ---
 
@@ -177,115 +196,57 @@ Implementation:
 $$D_{\text{hybrid}} = \alpha D_{\text{classical}} + \beta D_{\text{quantum}} + \gamma D_{\text{QAOA}}$$
 did not decorrelate the errors of each component. Result: equal to best individual.
 
-### 3.6 v9: Smart Hybrid (BREAKTHROUGH)
-**Date**: 2026-07-16
-**File**: `run_q_stpp_v9.py` (★ **ACTIVE**)
-**Focus**: Decision-level voting instead of linear combination
+### 3.6–3.9 v9–v12 (all WITHDRAWN)
 
-Innovation:
-- Each method produces a probability estimate
-- Weighted voting: weights ∝ CV accuracy
-- Errors are decorrelated by voting
+> These four versions built the "quantum advantage" narrative that was later
+> found to be unsupported by the code. They are **withdrawn**; the numbers below
+> are recorded only as history, not as current results.
 
-Results (synthetic data):
-| N | Classical | Hybrid | Δ |
-|---|-----------|--------|---|
-| 30 | 0.60 | 0.53 | -0.07 |
-| 60 | 0.82 | 0.65 | -0.17 |
-| **150** | **0.69** | **0.88** | **+0.19 ★** |
-| **300** | **0.73** | **0.84** | **+0.11 ★** |
-| **600** | **0.71** | **0.83** | **+0.12 ★** |
-
-**Quantum advantage emerges at N ≥ 150** (matches Mateu 2025 slide 44 prediction).
-
-### 3.7 v10: Quantum Algorithm Zoo
-**Date**: 2026-07-16
-**File**: `run_q_stpp_v10.py` (★ **ACTIVE**)
-**Focus**: 5 quantum algorithms from 2025-2026 papers
-
-| # | Algorithm | Paper | Result |
-|---|-----------|-------|--------|
-| 1 | Grover Adaptive Search (GAS) | IEEE TQE 2026 | 30/60 feasible |
-| 2 | **Quantum Bootstrap (QBOOT) ★** | arXiv 2604.00951 (2026) | **24% better SOP preservation** |
-| 3 | Quantum Amplitude Estimation (QAE) | Quantinuum QMCI | K-est = 29.05 |
-| 4 | QFT over Symmetric Group | arXiv 2603.22401 (2026) | perm-div = 9.64 |
-| 5 | Two-Step Quantum Search (TSQS) | IEEE TQE 2025 | 8 perms/pattern |
-
-### 3.8 v11: Architecture Consolidation
-**Date**: 2026-07-16
-**Files**: `ARCHITECTURE.md`, `THEORY.md` (★ **ACTIVE**)
-**Action**: Archived v6, v7, v8 code and reports. Created:
-- `ARCHITECTURE.md` (276 lines) — System architecture v11
-- `THEORY.md` (315 lines) — Mathematical foundations
-
-### 3.9 v12: ROI Verification (CRITICAL MILESTONE)
-**Date**: 2026-07-16
-**Files**: `run_q_stpp_v12_significance.py`, `run_q_stpp_v12_proper_kernel.py` (★ **ACTIVE**)
-**Focus**: Verify quantum advantage is real, not synthetic illusion
-
-**Two independent verifications**:
-
-1. **Statistical significance** (10 random seeds × 6 N values = 60 experiments):
-   - Paired t-test p-value < 0.0001 at N ≥ 150
-   - Effect size Cohen's d = +10.27 at N=900 (massive)
-   - Hybrid wins in 10/10 seeds at N ≥ 150
-
-2. **Proper quantum kernel** (IQP / data re-uploading):
-   - Replaced fake Hilbert projection with real quantum feature map
-   - At N=30: classical=0.567 vs quantum=0.767 (+0.200!)
-   - Havlíček 2019 (IQP) + Pérez-Salinas 2020 (data re-uploading) + Peters 2021 (higher-order)
-
-**Result**: Quantum advantage is REAL, REPRODUCIBLE, and STATISTICALLY SIGNIFICANT.
+- **v9 "Smart Hybrid"** (`run_q_stpp_v9.py`, removed): claimed "+0.19 over
+  classical at N=150" from decision-level voting. **WITHDRAWN** — the "quantum
+  kernel" feature it voted on was a classical random-Fourier projection.
+- **v10 "Quantum Algorithm Zoo"** (`run_q_stpp_v10.py`, removed): five
+  "quantum algorithms" (GAS, QBOOT, QAE, QFT-Symmetric, TSQS), several citing
+  arXiv IDs that could not be verified (e.g. "arXiv 2604.00951", "2603.22401").
+  **WITHDRAWN**.
+- **v11**: architecture/theory consolidation. Superseded by the corrected docs.
+- **v12 "ROI Verification"** (`run_q_stpp_v12_significance.py`,
+  `run_q_stpp_v12_proper_kernel.py`, removed): claimed a "proper IQP quantum
+  kernel" and a "statistically significant" advantage (p<0.0001, Cohen's d≈10).
+  **WITHDRAWN** — a genuine PennyLane IQP kernel existed in
+  `run_q_stpp_v12_proper_kernel.py`, but the *significance* script that produced
+  the headline p-values still used the classical RFF, so the reported
+  significance was not about a quantum kernel at all.
 
 ---
 
-## 4. ROI Verified
+## 4. ROI "Verified" (v12) — WITHDRAWN
+
+> This ROI block is **withdrawn** (see the banner at the top). It was built on the
+> v12 "quantum kernel" classification advantage, which turned out to be a
+> classical random-Fourier projection, not a quantum kernel. The figures below
+> are kept only as a record of what was claimed at the time — **not** as a
+> current result.
 
 ```
-Per 10,000 dengue cases:
-- Error reduction: 1,700 cases caught extra by quantum
-- Value at $100/caught: $170,000
-- Quantum hardware cost: -$5,000
-- NET ROI: $165,000 per 10,000 cases ✓
+[WITHDRAWN] Per 10,000 dengue cases:
+[WITHDRAWN] - Error reduction: 1,700 cases caught extra by quantum
+[WITHDRAWN] - Value at $100/caught: $170,000
+[WITHDRAWN] - Quantum hardware cost: -$5,000
+[WITHDRAWN] - NET ROI: $165,000 per 10,000 cases
 ```
 
 ---
 
-## 5. Current State (HEAD = bf40d8f)
+## 5. Historical snapshot (v12 — superseded)
 
-### 5.1 Active files (10 files in quantum-dengue-stpp/)
-```
-├── ARCHITECTURE.md                  # System architecture v11
-├── THEORY.md                        # Mathematical foundations
-├── README.md                        # Project overview
-├── DEVELOPMENT_HISTORY.md           # This file
-│
-├── Q_STPP_V9_REPORT.md              # Hybrid pipeline report
-├── Q_STPP_V10_REPORT.md             # Algorithm zoo report
-├── Q_STPP_V12_ROI_VERIFIED.md       # ROI verification report
-│
-├── run_q_stpp_v9.py                 # Hybrid pipeline (production)
-├── run_q_stpp_v10.py                # Quantum Algorithm Zoo
-├── run_q_stpp_v12_proper_kernel.py  # IQP quantum kernel
-└── run_q_stpp_v12_significance.py   # Statistical significance test
-```
+> This section described the repo *at commit `bf40d8f`*. It is **out of date**:
+> those v9/v10/v12 scripts and reports were removed when the project consolidated
+> to v15. For the current file list see §11. Kept only as a record.
 
-### 5.2 Active results (output_result/)
-```
-├── data/                            # TYCHO dengue CSVs
-├── q_stpp_v9/                       # Hybrid pipeline results
-├── q_stpp_v10/                      # Algorithm zoo results
-├── q_stpp_v12/                      # Proper quantum kernel results
-└── q_stpp_v12_significance/         # Statistical significance results
-```
-
-### 5.3 Archive (24 files in archive/)
-- All v0-v8 code and reports
-- Old PROJECT_ARCHITECTURE.md (replaced)
-- main.py, prove_quantum_x100.py
-- src/ (legacy modules no longer needed)
-- tests/ (legacy)
-- All old result folders
+The v12 snapshot listed `run_q_stpp_v9/v10/v12_*.py`, `Q_STPP_V9/V10/V12_*.md`,
+and `output_result/q_stpp_v9/v10/v12*` — **all removed**. The `output_result/data/`
+CSVs (OpenDengue-derived, see `dengue_dataset/`) remain.
 
 ---
 
@@ -293,10 +254,9 @@ Per 10,000 dengue cases:
 
 ### 6.1 What Worked
 ✅ **Alignment with published work** (Mateu 2025) provided structure
-✅ **Smart voting > linear combination** for hybrid pipelines
-✅ **5 quantum algorithms** from 2025-2026 papers (QBOOT wins for SOP preservation)
-✅ **Statistical rigor** (10 seeds, paired t-test) for honest claims
-✅ **Proper quantum kernel** (IQP) beats fake Hilbert projection
+✅ **Fair-comparison discipline** (shared seed, equal budget) once it was applied
+✅ **Reporting two metrics** (quality AND diversity) prevents mode-collapse from looking like a win
+✅ **Withdrawing over-claims** — the honest, scoped result is more credible than the inflated one
 
 ### 6.2 What Failed
 ❌ **R² regression** for STPP (mismatch with Mateu 2025 framework)
@@ -329,35 +289,29 @@ For brevity, see `archive/` for all archived files.
 - Branch: master (default)
 - Time span: 2026-05-30 to 2026-07-16 (47 days)
 - Commits: 30
-- Final state: v12 with verified quantum advantage
-
----
+- Final state: **v15 corrected** — a fair, fully classical comparison (see §11).
+  Earlier "quantum advantage" claims are withdrawn.
 
 ---
 
 ## 9. v13-v15: Quantum-Inspired SOP (July 16, afternoon)
 
-### 9.1 v13: Quantum Native SOP
+### 9.1 v13: "Quantum Native SOP" (removed)
 **Date**: 2026-07-16
-**File**: `run_q_stpp_v13_quantum_native.py` (**ACTIVE**)
-**Focus**: Native quantum circuit for SOP permutation sampling
+**File**: `run_q_stpp_v13_quantum_native.py` (removed)
+**Claim**: a PennyLane QAOA circuit sampling SOP permutations. Superseded and
+removed when the project consolidated to the single classical v15 script.
 
-**Implementation**:
-- Pennylane-based QAOA circuit for SOP problem
-- Hilbert space dimension matching permutation space
-- 6 qubits = 64 permutations sampled efficiently
-
-### 9.2 v14: Quick QAOA Comparison
+### 9.2 v14: Quick QAOA Comparison (removed)
 **Date**: 2026-07-16
-**File**: `run_q_stpp_v14_quick_qaoa.py` (archived)
-**Focus**: Quick comparison of QAOA approaches
+**File**: `run_q_stpp_v14_quick_qaoa.py` (removed)
 
-### 9.3 v15: Quantum-Inspired SOP (BREAKTHROUGH #2)
+### 9.3 v15: fair SOP comparison (current)
 **Date**: 2026-07-16
-**Files**: 
-- `run_q_stpp_v15_qaoa_sop.py` (initial - CHEATING detected)
-- `run_q_stpp_v15_fair.py` (**ACTIVE - FIXED**)
-**Focus**: Fair comparison of quantum-inspired algorithms
+**Files**:
+- `run_q_stpp_v15_qaoa_sop.py` (initial — unfair, removed)
+- `run_q_stpp_v15_fair.py` (**current**)
+**Focus**: fair comparison of three classical permutation-search heuristics
 
 #### v15 Discovery: CHEATING in Initial Implementation
 
@@ -377,28 +331,31 @@ This was brute-force enumeration disguised as "quantum-inspired"!
 - No unlimited sampling
 - Fair comparison: Classical MH vs Quantum-Inspired vs QAOA
 
-#### v15 Results (FAIR Comparison)
+#### v15-initial Results — WITHDRAWN
 
-| N | MH Error | QI Error | QAOA Error | **QI vs MH** |
-|---|----------|----------|------------|--------------|
-| 10 | 0.0024 | 0.00007 | 0.00038 | **35x** |
-| 15 | 0.0043 | 0.00007 | 0.00038 | **62x** |
-| 20 | 0.0084 | 0.00117 | 0.00355 | **7x** |
-| 30 | 0.0069 | 0.00017 | 0.00129 | **42x** |
-| 40 | 0.0039 | 0.00011 | 0.00046 | **37x** |
-| 50 | 0.0027 | 0.00020 | 0.00059 | **14x** |
+> The v15-initial "~33× better L(r) error" table (values like 35×/62×/42×) is
+> **withdrawn**. It came from an unfair comparison: the Metropolis-Hastings
+> baseline used the unseeded global RNG and a broken fixed acceptance
+> temperature that made it accept ~90% of worsening moves (so it barely
+> optimised), the three methods did not share an equal evaluation budget, and
+> the "×" figure divided by a near-zero denominator. It also reported only mean
+> error, which rewards mode collapse. **No such multiplier is claimed.**
 
-**Average: ~33x better L(r) error with FAIR comparison**
+#### v15 (corrected) — fair comparison
 
-#### v15 Algorithm (Quantum-Inspired)
+`run_q_stpp_v15_fair.py` was rewritten to fix all of the above:
 
-The "quantum-inspired" algorithm uses:
-1. **Focused local search** (inspired by Grover's amplitude amplification)
-2. **Gradient-free optimization** with smart perturbation
-3. **Oracle marking** - quality scoring of permutations
-4. **Beam search** from good candidates
+1. Every method is seeded identically — each re-instantiates `default_rng(seed)`
+   with the same `seed`, so they start from the same random state (differences in
+   the stream come only from the differing proposal/acceptance, not the seed).
+2. Each method spends exactly `evals_per_perm` L-summary evaluations (equal budget).
+3. Scale-adaptive annealed temperature for MH (no magic constant).
+4. Both **L(r) error** (quality) and **set diversity** are reported.
+5. Ratios are clamped; the headline is the two metrics, not a multiplier.
 
-**Why it works**: Unlike MH (random walk), QI-SOP focuses search on promising regions of permutation space - similar to how Grover's algorithm amplifies probability of correct answer.
+All three methods are **classical**; "Grover-/QAOA-inspired" are heuristic
+analogies, not quantum circuits. Result numbers are produced by running the
+script (see `Q_STPP_V15_REPORT.md`); none are hard-coded here.
 
 ---
 
@@ -424,31 +381,38 @@ Then: v13 ─→ v14 ─→ v15 (FAIR)
 
 ---
 
-## 11. Current State (v15)
+## 11. Current State (v15 corrected)
 
 ### 11.1 Active files
 ```
-├── ARCHITECTURE.md                  # System architecture v11
-├── THEORY.md                        # Mathematical foundations
-├── DEVELOPMENT_HISTORY.md           # This file (updated to v15)
+├── ARCHITECTURE.md            # System design (matches the code)
+├── THEORY.md                  # L-function + local-search background
+├── DEVELOPMENT_HISTORY.md     # This file
+├── README.md                  # Quick start
+├── Q_STPP_V15_REPORT.md       # Methodology + results template
 │
-├── run_q_stpp_v9.py                 # Hybrid pipeline (production)
-├── run_q_stpp_v12_significance.py   # Statistical significance test
-├── run_q_stpp_v13_quantum_native.py # Native quantum SOP
-├── run_q_stpp_v15_fair.py           # ★ FAIR quantum-inspired SOP
+├── run_q_stpp_v15_fair.py     # ★ the entire pipeline (classical)
+├── run.sh                     # convenience wrapper
+├── requirements.txt           # numpy, scipy, matplotlib
 │
 ├── output_result/
-│   ├── q_stpp_v12_significance/     # v12 classification results
-│   └── q_stpp_v15_qaoa_sop_fixed/  # ★ v15 SOP results (FAIR)
+│   ├── data/                  # cached synthetic event CSVs
+│   └── q_stpp_v15_fair/       # results.json + plot.png (created by a run)
+│
+└── archive/                   # withdrawn / superseded versions (v4–v12)
 ```
+
+Note: the earlier scripts (`run_q_stpp_v9.py`, `run_q_stpp_v10.py`,
+`run_q_stpp_v12_*.py`, `run_q_stpp_v13_*.py`) were removed when the project
+consolidated to the single fair-comparison script.
 
 ### 11.2 Key Findings Summary
 
-| Version | Focus | Key Result |
-|---------|-------|------------|
-| v12 | Classification | +15.4pp hybrid advantage (significant at N≥150) |
-| v13 | Quantum SOP | Native quantum circuit for permutation sampling |
-| v15 | QI-SOP | **33x better L(r) error** (FAIR comparison) |
+| Version | Focus | Status |
+|---------|-------|--------|
+| v9–v12 | "Quantum kernel" classification (+0.16 accuracy) | **WITHDRAWN** — the "quantum kernel" was a classical random-Fourier projection, not quantum |
+| v15-initial | QI-SOP "~33×" | **WITHDRAWN** — unfair comparison (see §9) |
+| v15 corrected | Fair SOP comparison | classical MH vs Grover-/QAOA-inspired; reports L(r) error **and** diversity; no quantum advantage claimed |
 
 ---
 
@@ -456,10 +420,9 @@ Then: v13 ─→ v14 ─→ v15 (FAIR)
 
 ### 12.1 What Worked
 ✅ **Alignment with published work** (Mateu 2025) provided structure
-✅ **Smart voting > linear combination** for hybrid pipelines
-✅ **Statistical rigor** (10 seeds, paired t-test) for honest claims
-✅ **FAIR comparison** - same computational budget for all methods
-✅ **Quantum-Inspired algorithms** - focused search beats random walk
+✅ **Fair-comparison discipline** — shared seed + equal evaluation budget
+✅ **Reporting two metrics** (L(r) error AND diversity) prevents mode-collapse from looking like a win
+✅ **Withdrawing over-claims** — the honest scope is more credible than the inflated numbers
 
 ### 12.2 What Failed
 ❌ **R² regression** for STPP (mismatch with Mateu 2025 framework)
@@ -475,28 +438,15 @@ Then: v13 ─→ v14 ─→ v15 (FAIR)
 
 ---
 
-## 13. ROI Summary (v12 + v15)
+## 13. ROI Summary — WITHDRAWN
 
-### Classification (v12)
-```
-Per 10,000 dengue cases:
-- Error reduction: 1,700 cases caught extra by quantum
-- Value at $100/caught: $170,000
-- Quantum hardware cost: -$5,000
-- NET ROI: $165,000 per 10,000 cases ✓
-```
-
-### SOP Augmentation (v15)
-```
-L(r) Preservation:
-- Classical MH: ~0.005 error
-- Quantum-Inspired: ~0.0002 error (33x better)
-- R² for L(r): ~0.97
-
-Impact:
-- Better augmentation → better classification features
-- Faster iteration (4x speedup potential)
-```
+> The previous ROI figures ("$165,000 per 10,000 cases", "1,700 extra cases
+> caught by quantum", "~33× better L(r) error", "R² ~0.97") are **withdrawn**.
+> They were built on the withdrawn quantum-kernel classification result and the
+> unfair v15-initial comparison, and the "R²" was never computed by any code.
+> No monetary ROI or speedup multiplier is claimed. The corrected project
+> reports only L(r) preservation error and set diversity, produced by running
+> `run_q_stpp_v15_fair.py`.
 
 ---
 
@@ -516,8 +466,11 @@ git log --all --reverse --name-status --pretty=format:"%h | %ai | %an | %s"
 - Branch: master (default)
 - Time span: 2026-05-30 to 2026-07-16 (47 days)
 - Commits: 30+
-- Final state: v15 with verified quantum-inspired advantage
+- Final state: v15 corrected — a fair, honest, **classical** comparison of SOP
+  permutation-search heuristics. Earlier "quantum advantage" claims are withdrawn.
 
 ---
 
-**This document is the canonical history of the Quantum-Dengue-STPP project. It captures all versions from initial exploratory code to the current verified v15 QI-SOP state.**
+**This document is the canonical history of the Quantum-Dengue-STPP project. It
+records every version, including the claims that were later withdrawn for being
+over-stated or not backed by the code.**

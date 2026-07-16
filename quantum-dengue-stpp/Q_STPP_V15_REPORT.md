@@ -1,257 +1,137 @@
-# Q-STPP v15: Quantum-Inspired Spatial-Temporal Point Process for Dengue Prediction
+# Q-STPP v15 (corrected) — Report
 
-## Executive Summary
+**Date**: 2026-07-16
+**Status**: methodology finalised; **result tables to be populated by a run** of
+`run_q_stpp_v15_fair.py` (see §4).
 
-Q-STPP v15 is a quantum-inspired Spatial-Temporal Point Process framework for predicting dengue fever hotspots. By leveraging **quantum-native optimization techniques** with **Sum-of-Squares Programming (SOS)**, we achieve **32.7x better L(r) error** compared to classical Metropolis-Hastings methods, while maintaining the same computational budget.
-
----
-
-## 1. Problem Definition
-
-### 1.1 Dengue Prediction Challenge
-
-Dengue fever affects 400 million people annually, with spatial-temporal patterns that are difficult to predict using classical methods. Key challenges:
-
-- **Spatially heterogeneous** infection rates across districts
-- **Temporal dependencies** with varying incubation periods (4-14 days)
-- **Non-linear interactions** between weather, mobility, and infection spread
-- **Rare event prediction** - dengue outbreaks are low-probability, high-impact events
-
-### 1.2 Mathematical Formulation
-
-We model dengue case locations as a **spatial-temporal point process**:
-
-Given historical dengue cases at locations {x₁, x₂, ..., xₙ} in time window [0, T], we predict future hotspots by estimating the **conditional intensity function**:
-
-```
-λ*(x | Hₜ) = λ₀(x) · exp(θᵀ · φ(x, Hₜ))
-```
-
-Where:
-- λ₀(x): baseline intensity at location x
-- φ(x, Hₜ): feature vector capturing spatial-temporal context
-- θ: learned parameters
-
-**Goal**: Minimize L(r) = ||λ_predicted - λ_actual||²
+> **Withdrawal notice.** A previous version of this report claimed a "32.7×
+> better L(r) error", a "95.3% R²", and a "Sum-of-Squares / Born-machine"
+> pipeline. Those claims were **invalid** and are withdrawn:
+> - the "32.7×" came from an unfair comparison (unseeded baseline, a broken
+>   acceptance temperature that crippled Metropolis-Hastings, unequal budgets,
+>   and a ratio divided by a near-zero denominator);
+> - the "R² 95.3%" was never computed by any code;
+> - no SOS / Born-machine / SDP code ever existed.
+>
+> This report describes the corrected, fair experiment. It contains **no result
+> numbers until the script is run** — none are hand-written.
 
 ---
 
-## 2. Quantum-Inspired Approach
+## 1. Problem
 
-### 2.1 Why Quantum-Inspired?
+Second-Order Preserving (SOP) permutations augment spatio-temporal point-process
+data by permuting event time-stamps while preserving Ripley's L-function
+(Mohler & Mateu 2024). A good augmenter must simultaneously:
 
-Quantum computers promise exponential speedup for certain optimization problems, but current NISQ devices cannot handle real-world dengue data. **Quantum-inspired classical algorithms** bridge this gap by:
+1. **preserve L(r)** — low `E(π) = ‖L(π) − L_target‖²`, and
+2. **stay diverse** — the returned set must not collapse to one permutation.
 
-1. **Embedding quantum properties** in classical computations
-2. **Using quantum probability distributions** for sampling
-3. **Leveraging tensor network methods** for high-dimensional optimization
-
-### 2.2 Sum-of-Squares Programming (SOS)
-
-The core innovation is reformulating the L(r) minimization as an **SOS problem**:
-
-```
-minimize    ε
-subject to  L(r) - ε = Σᵢ gᵢ(x)²     (gᵢ are polynomials)
-            θ ∈ S                     (constraint set)
-```
-
-This allows us to use **quantum relaxation** techniques that outperform classical SDP solvers.
-
-### 2.3 Algorithm Pipeline
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Q-STPP v15 Pipeline                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐ │
-│  │ Historical│    │ Feature  │    │  Quantum │    │  SOS     │ │
-│  │ Dengue    │───▶│ Extract  │───▶│ Inspired │───▶│ Optim    │──▶ Prediction│
-│  │ Cases     │    │ φ(x,Hₜ)  │    │ Sampler  │    │          │ │
-│  └──────────┘    └──────────┘    └──────────┘    └──────────┘ │
-│                                           │                     │
-│                                    ┌──────┴──────┐              │
-│                                    │ Amplitude  │              │
-│                                    │ Estimation │              │
-│                                    └────────────┘              │
-└─────────────────────────────────────────────────────────────────┘
-```
+We compare three classical search strategies for producing such permutations.
 
 ---
 
-## 3. Technical Architecture
+## 2. Methods
 
-### 3.1 System Components
+All three are classical local searches over permutations (no quantum hardware,
+no quantum simulator — see the note in §6):
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Q-STPP v15                               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              Data Ingestion Layer                       │    │
-│  │  • Dengue case locations (lat, lon, timestamp)         │    │
-│  │  • Weather data (temperature, humidity, rainfall)        │    │
-│  │  • Population density maps                             │    │
-│  │  • Mobility patterns                                   │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                              │                                   │
-│                              ▼                                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              Feature Engineering                         │    │
-│  │  • Spatial kernel: K(x, x') = exp(-||x-x'||² / 2σ²)    │    │
-│  │  • Temporal kernel: K(t, t') = exp(-|t-t'| / τ)        │    │
-│  │  • Cross-correlation features                           │    │
-│  │  • Gradient features for outbreak detection             │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                              │                                   │
-│                              ▼                                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              Quantum-Inspired Optimization               │    │
-│  │                                                          │    │
-│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐        │    │
-│  │  │  Hybrid     │  │  QAOA      │  │  Born      │        │    │
-│  │  │  (QI-SOP)   │  │  (Baseline)│  │  Machine   │        │    │
-│  │  │  ★ BEST     │  │            │  │  Sampling  │        │    │
-│  │  └────────────┘  └────────────┘  └────────────┘        │    │
-│  │                                                          │    │
-│  │  • Amplitude estimation for gradient computation        │    │
-│  │  • Variationally tuned parameters                       │    │
-│  │  • Classical shadow tomography                          │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                              │                                   │
-│                              ▼                                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              SOS Relaxation & Verification               │    │
-│  │  • Certificate generation                               │    │
-│  │  • Optimality gap bounds                                │    │
-│  │  • Feasibility verification                             │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                              │                                   │
-│                              ▼                                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              Prediction Output                           │    │
-│  │  • Hotspot probability maps                             │    │
-│  │  • Risk scores per district                             │    │
-│  │  • Temporal evolution forecasts                         │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+| Key | Name | Proposal | Acceptance |
+|-----|------|----------|------------|
+| `mh` | Metropolis-Hastings | single swap | Metropolis, scale-adaptive annealed temperature |
+| `grover` | Grover-inspired (greedy) | single swap | greedy (accept iff error drops) |
+| `qaoa` | QAOA-inspired (multi-swap) | multi swap | greedy |
+
+"Grover-/QAOA-inspired" are heuristic analogies (focused amplification / mixer
+perturbations), **not** quantum circuits.
+
+---
+
+## 3. Fair-comparison protocol
+
+The comparison is controlled on every axis that the earlier version got wrong:
+
+- **Same randomness** — every method re-instantiates `np.random.default_rng(seed)`
+  with the same `seed`, so all three start from the same random state; the stream
+  diverges only through the differing proposal/acceptance, never through a
+  different seed.
+- **Same budget** — each method spends *exactly* `evals_per_perm` L-summary
+  evaluations per permutation (the L-summary, an `O(N²)` distance sweep, is the
+  dominant cost; we count evaluations, not swaps).
+- **Same objective** — all minimise `E(π) = ‖L(π) − L_target‖²`.
+- **Proper MH temperature** — geometric annealing derived from the initial error
+  magnitude, replacing the fixed `1/10` that made MH accept ~90% of worsening
+  moves.
+- **Two metrics** — we report **L(r) error** (quality) *and* **set diversity**
+  (mean pairwise normalised Hamming distance), so a low-error-but-collapsed
+  method cannot look like a winner.
+- **Bounded ratios** — any error ratio is computed with a clamped denominator; it
+  is a secondary figure, not the headline.
+
+Data: reproducible Hawkes-like space-time patterns from `simulate_hawkes(seed)`.
+
+---
+
+## 4. Results — to be generated
+
+Run:
+
+```bash
+python3 run_q_stpp_v15_fair.py --seeds 1 2 3 4 5 --n_events 20 30 50
 ```
 
-### 3.2 Key Innovation: Hybrid Quantum-Inspired SOP
+This writes:
 
-Our best-performing method combines:
+- `output_result/q_stpp_v15_fair/fair_comparison_results.json`
+- `output_result/q_stpp_v15_fair/fair_comparison_plot.png`
 
-1. **Quantum probability amplitudes** from Born rule
-2. **Sum-of-Squares programming** for global optimization
-3. **Classical shadow tomography** for efficient state estimation
+Then fill in the tables below from `fair_comparison_results.json["aggregate"]`.
 
-```python
-# Hybrid QI-SOP的核心伪代码
-def hybrid_qi_sop(X_train, X_test):
-    # Step 1: Construct measurement operators
-    M = construct_sos_matrix(X_train)
+### 4.1 Quality — mean L(r) error (lower is better)
 
-    # Step 2: Compute quantum-inspired amplitudes
-    amplitudes = born_amplitude(M)
+| N (target) | MH | Grover-inspired | QAOA-inspired |
+|-----------|----|-----------------|---------------|
+| 20 | _tbd_ | _tbd_ | _tbd_ |
+| 30 | _tbd_ | _tbd_ | _tbd_ |
+| 50 | _tbd_ | _tbd_ | _tbd_ |
 
-    # Step 3: SOS verification
-    if is_sos(amplitudes):
-        return project_to_sos(amplitudes)
-    else:
-        return classical_refine(amplitudes)
-```
+### 4.2 Diversity — mean pairwise Hamming distance (higher is better)
 
----
-
-## 4. Experimental Results
-
-### 4.1 FAIR Comparison Setup
-
-We compare methods under **identical computational budget**:
-
-| Method | Description | Time Budget |
-|--------|-------------|------------|
-| Classical MH | Metropolis-Hastings sampling | T |
-| QAOA | Quantum Approximate Optimization | T |
-| **Hybrid QI-SOP** | **Quantum-Inspired SOS** | **T** |
-
-### 4.2 Performance by Data Scale
-
-| N Events | Classical L(r) | Hybrid L(r) | Improvement |
-|----------|---------------|-------------|-------------|
-| 10 | 0.002448 | 0.000069 | **35.4x** |
-| 15 | 0.004287 | 0.000069 | **61.9x** |
-| 20 | 0.008449 | 0.001171 | **7.2x** |
-| 30 | 0.006946 | 0.000167 | **41.6x** |
-| 40 | 0.003876 | 0.000106 | **36.6x** |
-| 50 | 0.002691 | 0.000198 | **13.6x** |
-| **Average** | 0.004783 | 0.000297 | **32.7x** |
-
-### 4.3 R² Performance
-
-| Metric | Classical | Hybrid | Improvement |
-|--------|-----------|--------|-------------|
-| R² Score | 4.7% | **95.3%** | +90.6% |
-| Error Variance | 0.0048 | **0.0003** | 16x reduction |
-
-### 4.4 Key Findings
-
-1. **Consistent improvement across all data scales** (N=10 to N=50)
-2. **Best performance at N=15** with 61.9x error reduction
-3. **Robust at scale** - minimal degradation as data grows
-4. **Same computational budget** - fair comparison against classical
+| N (target) | MH | Grover-inspired | QAOA-inspired |
+|-----------|----|-----------------|---------------|
+| 20 | _tbd_ | _tbd_ | _tbd_ |
+| 30 | _tbd_ | _tbd_ | _tbd_ |
+| 50 | _tbd_ | _tbd_ | _tbd_ |
 
 ---
 
-## 5. Theoretical Justification
+## 5. How to interpret (expected shape, not a claim)
 
-### 5.1 Why Quantum-Inspired Works Better
+Because greedy search optimises error directly while the MH sampler keeps
+diversity, we expect a **quality–diversity trade-off**:
 
-The quantum-inspired approach succeeds because:
+- greedy (`grover`, `qaoa`): lower L(r) error, lower diversity;
+- sampler (`mh`): slightly higher error, substantially higher diversity.
 
-1. **Entanglement-like correlations**: The SOS matrix captures multi-variate dependencies that classical methods miss
-
-2. **Superposition representation**: Instead of point estimates, we optimize over probability distributions
-
-3. **Born machine sampling**: The Born rule provides a more expressive distribution family than classical exponential families
-
-4. **Optimality certificates**: SOS verification provides guarantees that classical methods cannot
-
-### 5.2 Complexity Analysis
-
-| Operation | Classical | Quantum-Inspired | Speedup |
-|-----------|----------|-----------------|---------|
-| Kernel computation | O(N²) | O(N²) | 1x |
-| Optimization | O(N³) SDP | O(N²) SOP | **N** |
-| Sampling | O(N) | O(1) amp. est. | **N** |
-
-### 5.3 Future Scaling
-
-The quantum-inspired approach is designed to **natively migrate to quantum hardware**:
-
-- **Current**: Classical simulation of quantum circuits
-- **Near-term**: VQE on NISQ devices
-- **Future**: Fault-tolerant quantum advantage
+The honest takeaway is that method choice depends on the downstream need
+(pure fidelity vs. augmentation diversity) — **not** that any method is "N×
+better", and **not** that anything quantum is happening.
 
 ---
 
-## 6. Conclusion
+## 6. Honest limitations
 
-Q-STPP v15 demonstrates that **quantum-inspired classical algorithms** can significantly outperform classical baselines for spatial-temporal prediction. The key innovations:
-
-1. **Sum-of-Squares programming** reformulation
-2. **Born machine sampling** for expressive distributions
-3. **Hybrid quantum-classical** optimization pipeline
-
-With **32.7x improvement** in L(r) error and **95.3% R²**, Q-STPP v15 provides a practical path toward quantum advantage for epidemiological forecasting.
+- **Classical only** — no quantum hardware or simulator is used; the
+  "quantum-inspired" label refers to the search heuristic, nothing more.
+- **Synthetic data only** — Hawkes-like patterns, not real dengue surveillance.
+- **Summary-level** — we compare L(r) preservation of permutation sets, not
+  end-to-end outbreak-classification accuracy.
 
 ---
 
-## Appendix: Reproducibility
+## 7. Files
 
-- **Code**: `run_q_stpp_v15_fair.py`
-- **Results**: `output_result/q_stpp_v15_qaoa_sop_fixed/`
-- **History**: `DEVELOPMENT_HISTORY.md`
+- `run_q_stpp_v15_fair.py` — the experiment
+- `output_result/q_stpp_v15_fair/` — results (created by a run)
+- `ARCHITECTURE.md`, `THEORY.md` — matching design and background
+- `DEVELOPMENT_HISTORY.md` — full history incl. withdrawn claims

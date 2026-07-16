@@ -19,3 +19,5 @@ Thumbs.db
 # Editors
 .vscode/
 .idea/
+# Generated v15 run outputs (reproducible via ./run.sh)
+quantum-dengue-stpp/output_result/q_stpp_v15_fair/

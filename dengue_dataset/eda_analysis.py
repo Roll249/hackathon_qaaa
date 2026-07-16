@@ -4,10 +4,14 @@ Comprehensive Exploratory Data Analysis for Dengue Dataset
 Southeast Asia Dengue Surveillance Data
 """
 
+import os
 import pandas as pd
 import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
+
+# Run relative to this script's directory so paths are portable.
+os.chdir(os.path.dirname(os.path.abspath(__file__)) or '.')
 
 # ==============================================================================
 # 1. LOAD DATA
@@ -21,15 +25,15 @@ print("\n[1] LOADING DATA FILES...")
 print("-"*40)
 
 # File 1: Spatial data (yearly)
-df_spatial = pd.read_csv('/home/khang/Work/hackathon/dengue_dataset/sea_dengue_spatial.csv')
+df_spatial = pd.read_csv('sea_dengue_spatial.csv')
 print(f"sea_dengue_spatial.csv: {df_spatial.shape[0]:,} rows x {df_spatial.shape[1]} columns")
 
 # File 2: Admin1 monthly data (long format)
-df_long = pd.read_csv('/home/khang/Work/hackathon/dengue_dataset/sea_dengue_admin1_month.csv')
+df_long = pd.read_csv('sea_dengue_admin1_month.csv')
 print(f"sea_dengue_admin1_month.csv: {df_long.shape[0]:,} rows x {df_long.shape[1]} columns")
 
 # File 3: Pivot table
-df_pivot = pd.read_csv('/home/khang/Work/hackathon/dengue_dataset/sea_dengue_admin1_month_pivot.csv')
+df_pivot = pd.read_csv('sea_dengue_admin1_month_pivot.csv')
 print(f"sea_dengue_admin1_month_pivot.csv: {df_pivot.shape[0]} rows x {df_pivot.shape[1]} columns")
 
 # ==============================================================================
@@ -370,7 +374,7 @@ print("\nSample events:")
 print(events_df.head(10).to_string())
 
 # Save events to CSV
-events_df.to_csv('/home/khang/Work/hackathon/dengue_dataset/simulated_point_events.csv', index=False)
+events_df.to_csv('simulated_point_events.csv', index=False)
 print(f"\nSaved simulated events to: simulated_point_events.csv")
 
 # ==============================================================================

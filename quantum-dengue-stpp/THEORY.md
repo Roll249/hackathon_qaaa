@@ -1,352 +1,151 @@
-# Q-STPP v15: Theoretical Foundations
+# Q-STPP v15 (corrected) — Theoretical background
 
-## 1. Spatial-Temporal Point Processes
-
-### 1.1 Definition
-
-A **spatial-temporal point process** is a random mathematical model for points distributed in space and time. For dengue prediction, we observe:
-
-- Locations of dengue cases: {x₁, x₂, ..., xₙ} ∈ ℝ²
-- Time of occurrence: {t₁, t₂, ..., tₙ} ∈ ℝ⁺
-
-The process is characterized by its **conditional intensity function** λ*(x, t | Hₜ):
-
-```
-λ*(x, t | Hₜ) = lim_{dt→0} Pr{event in [t, t+dt) × B(x, dx)] | Hₜ} / (dt · dx)
-```
-
-Where:
-- Hₜ = history of events up to time t
-- B(x, dx) = ball of radius dx around x
-
-### 1.2 Intensity Estimation Goal
-
-Given historical events, we want to predict future intensity:
-
-```
-λ_predicted(x, t) = λ̂(x, t | Hₜ)
-```
-
-**Objective**: Minimize prediction error L(r):
-
-```
-L(r) = ‖λ_predicted - λ_actual‖²
-     = ∫∫ (λ̂(x,t) - λ(x,t))² dx dt
-```
+> **Honest scope note.** This document describes only the mathematics that the
+> code (`run_q_stpp_v15_fair.py`) actually implements: spatio-temporal point
+> patterns, Ripley's K/L second-order summaries, SOP permutations, and classical
+> local search. Earlier drafts of this file described a "Sum-of-Squares (SOS)
+> programming / Born-machine / PSD-certificate" pipeline — **none of that exists
+> in the code** and it has been removed.
 
 ---
 
-## 2. Quantum-Inspired Framework
+## 1. Spatio-temporal point processes
 
-### 2.1 Motivation
-
-Classical methods like Metropolis-Hastings (MH) sampling suffer from:
-
-1. **Slow mixing** in high dimensions
-2. **Local optima** trapping
-3. **No optimality guarantees**
-
-Quantum computers promise advantages, but current NISQ devices cannot handle real-world data sizes.
-
-**Quantum-inspired classical algorithms** capture quantum advantages using:
-
-- Tensor network representations
-- Quantum probability amplitudes
-- Born machine architectures
-
-### 2.2 Quantum Probability Formalism
-
-In quantum mechanics, a system state is represented by a **wave function** |ψ⟩ in Hilbert space:
+A spatio-temporal point process is a random collection of events
+`{(xᵢ, yᵢ, tᵢ)}` in space × time. For dengue we treat case reports as such
+events. The process is characterised by its conditional intensity
 
 ```
-|ψ⟩ = Σᵢ αᵢ |i⟩
+λ*(x, t | H_t) = expected event rate at (x, t) given history H_t.
 ```
 
-Where αᵢ are **probability amplitudes** satisfying:
-
-```
-Σᵢ |αᵢ|² = 1     (normalization)
-```
-
-The **Born rule** gives measurement probabilities:
-
-```
-P(i) = |⟨i|ψ⟩|² = |αᵢ|²
-```
-
-**Key insight**: Quantum probability distributions are more expressive than classical exponential families.
+We do **not** fit an intensity model in this repository. We work at the level of
+**second-order summary statistics**, which is what the SOP method operates on.
 
 ---
 
-## 3. Sum-of-Squares (SOS) Programming
+## 2. Ripley's K- and L-functions (second-order structure)
 
-### 3.1 SOS Fundamentals
-
-A polynomial p(x) is **sum-of-squares** if it can be written as:
+For a stationary pattern with intensity λ, Ripley's K-function is
 
 ```
-p(x) = Σᵢ gᵢ(x)²
+K(r) = (1/λ) · E[ number of further events within distance r of a typical event ].
 ```
 
-Where gᵢ(x) are polynomials.
-
-**Key theorem**: Checking if p(x) is SOS is equivalent to a **semidefinite program (SDP)**.
-
-### 3.2 SOS Relaxation for Optimization
-
-Consider the optimization:
+Empirically, over N events with pairwise distances `d_ij`,
 
 ```
-minimize    f(x)
-subject to  x ∈ S
+K̂(r) ≈ (1/N²) · #{ (i,j), i≠j : d_ij < r }.
 ```
 
-We reformulate as:
+A variance-stabilising transform gives an L-function. The classical planar
+choice is `L(r) = √(K(r)/π)`. Because our events live in space × time, the code
+uses a stabilised summary `L(r) = sign(K)·|K|^(1/3)` over a space-time distance
+(with time rescaled to the spatial range). The exact transform is not important
+for the experiment: it is applied **identically** to every method, so relative
+comparisons of "how well is L(r) preserved" remain valid.
 
-```
-minimize    ε
-subject to  f(x) - ε ≥ 0  ∀x ∈ S
-            ε is scalar
-```
-
-The constraint "f(x) - ε ≥ 0" is replaced by "f(x) - ε is SOS":
-
-```
-f(x) - ε = Σᵢ gᵢ(x)²
-```
-
-This gives a tractable SDP.
-
-### 3.3 SOS for Point Process Intensity
-
-For dengue intensity estimation:
-
-```
-minimize    ∫ (λ̂(x) - λ(x))² dx
-subject to  λ̂(x) ≥ 0  ∀x
-            ∫ λ̂(x) dx = total_cases
-```
-
-SOS relaxation:
-
-```
-minimize    ε
-subject to  ‖λ̂ - λ‖² - ε = Σᵢ gᵢ(x)²
-            λ̂(x) = v(x)ᵀ M v(x)
-            M ≽ 0  (positive semidefinite)
-```
+Implemented in `compute_L_summary(times, x, y, r_values)`.
 
 ---
 
-## 4. Hybrid Quantum-Inspired SOP Algorithm
+## 3. Second-Order Preserving (SOP) permutations
 
-### 4.1 Algorithm Overview
+**Goal (Mohler & Mateu 2024).** Augment a point pattern by permuting the event
+time-stamps while keeping its second-order spatial structure — i.e. produce a
+new labelling whose L(r) stays close to the original's `L_target(r)`.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│           HYBRID QUANTUM-INSPIRED SOP ALGORITHM             │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  INPUT: Training data {xᵢ, tᵢ}, test point x*              │
-│                                                              │
-│  STEP 1: Feature Extraction                                  │
-│  ─────────────────────────                                   │
-│  φ(x) = [K(x,x₁), K(x,x₂), ..., K(x,xₙ)]ᵀ                 │
-│                                                              │
-│  STEP 2: SOS Matrix Construction                             │
-│  ─────────────────────────────────                          │
-│  M = Φ Φᵀ  where Φ = [φ(x₁), ..., φ(xₙ)]                   │
-│                                                              │
-│  STEP 3: Quantum-Inspired Amplitude                         │
-│  ──────────────────────────────────                         │
-│  |ψ⟩ = M |0⟩ / √⟨0|M²|0⟩                                  │
-│                                                              │
-│  STEP 4: SOS Verification                                   │
-│  ────────────────────────                                   │
-│  Check: M ≽ 0 (positive semidefinite)?                      │
-│                                                              │
-│  STEP 5: If not SOS → Refine                                │
-│  ─────────────────────────────                               │
-│  M_new = M - η · gradient(L(θ))                             │
-│  Repeat until SOS verified                                   │
-│                                                              │
-│  STEP 6: Prediction                                          │
-│  ──────────────                                             │
-│  λ̂(x*) = ⟨ψ|M|ψ⟩ = ‖φ(x*)‖²                               │
-│                                                              │
-│  OUTPUT: Predicted intensity λ̂(x*)                         │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 4.2 Mathematical Details
-
-**Step 1: Kernel Feature Map**
-
-We use a **Gaussian kernel**:
+Given the target, the SOP search minimises the discrepancy
 
 ```
-K(x, x') = exp(-‖x - x'‖² / 2σ²)
+E(π) = ‖ L(π) − L_target ‖²      (mean squared over the radii r)
 ```
 
-This induces an infinite-dimensional feature space where:
+over permutations π of the time index. This is `l_error(...)` in the code.
+
+**Two objectives, not one.** A permutation set is useful for augmentation only
+if it (a) has low `E(π)` **and** (b) is diverse — otherwise you have copies of a
+single sample. We therefore also measure
 
 ```
-K(x, x') = ⟨φ(x), φ(x')⟩
+diversity(Π) = mean over pairs (π_a, π_b) of  (fraction of positions that differ).
 ```
 
-**Step 2: SOS Matrix**
-
-The Gram matrix of features:
-
-```
-Mᵢⱼ = K(xᵢ, xⱼ) = ⟨φ(xᵢ), φ(xⱼ)⟩
-```
-
-**Step 3: Born Machine Interpretation**
-
-Treat M as an unnormalized quantum state:
-
-```
-|ψ⟩ = Σᵢ √Mᵢ₀ |i⟩ / √(Σⱼ Mⱼ₀)
-```
-
-**Step 4: PSD Check**
-
-M is positive semidefinite (PSD) if all eigenvalues ≥ 0:
-
-```
-M ≽ 0  ⟺  λᵢ ≥ 0 ∀i
-```
-
-**Step 5: Gradient Refinement**
-
-If M is not PSD, minimize:
-
-```
-L(θ) = -min_eigenvalue(M(θ))
-```
-
-with gradient descent until min_eigenvalue ≥ 0.
-
-### 4.3 Why This Works
-
-The quantum-inspired SOP succeeds because:
-
-1. **Expressive power**: The Born distribution p(i) = Mᵢⱼ / Tr(M) captures correlations that classical methods miss.
-
-2. **Convexity**: The PSD constraint ensures we stay in a convex region.
-
-3. **Optimality**: SOS certificates provide proof of optimality (unlike heuristic methods).
-
-4. **Smoothing**: Quantum amplitude estimation acts as natural regularization.
+`diversity = 0` means total mode collapse; `diversity ≈ 1` means every
+permutation differs everywhere. This is `set_diversity(...)`.
 
 ---
 
-## 5. Comparison with Other Methods
+## 4. Search strategies compared
 
-### 5.1 Classical Metropolis-Hastings
+All three are classical local searches over permutations under an **identical
+evaluation budget** (same number of `compute_L_summary` calls) and an
+**identical RNG seed**.
 
-**Algorithm**:
-1. Start at current state x
-2. Propose new state x' ~ q(x'|x)
-3. Accept with probability: min(1, π(x')/π(x))
-4. Repeat
+### 4.1 Metropolis-Hastings (`mh`)
 
-**Limitations**:
-- Slow mixing in high dimensions
-- Sensitive to proposal distribution
-- No optimality guarantees
+Standard Metropolis sampler with single-swap proposals:
 
-### 5.2 QAOA (Quantum Approximate Optimization)
+```
+propose π' by swapping two time indices
+accept if  E(π') < E(π)   or with prob.  exp( −(E(π') − E(π)) / T_step ).
+```
 
-**Algorithm**:
-1. Prepare ansatz state: |ψ(θ)⟩ = PROD U(C,γᵢ)U(B,βᵢ)|+⟩
-2. Measure cost function C
-3. Classical optimization of (γ, β)
+The temperature `T_step` is **scale-adaptive**: it starts at the initial error
+magnitude of a random permutation and decays geometrically to 1% of it
+(simulated annealing). This is the fix for the earlier bug where a fixed `T=1/10`
+made the sampler accept ~90% of worsening moves and effectively random-walk.
 
-**Limitations**:
-- Classical simulation is exponential
-- Barren plateaus in optimization landscape
-- Limited circuit depth on real hardware
+MH is a *sampler*: by design it accepts some worsening moves, which keeps the
+returned set diverse.
 
-### 5.3 Hybrid QI-SOP (Our Method)
+### 4.2 Grover-inspired greedy search (`grover`)
 
-**Advantages**:
-- Polynomial-time classical simulation
-- Direct optimization of objective
-- SOS certificates for verification
-- Native path to quantum hardware
+Same single-swap proposal, but **greedy** acceptance (accept iff the error
+strictly decreases). The name is an analogy to amplitude amplification
+(focusing effort on improving candidates); it is **not** a quantum circuit.
+Greedy search reaches lower error but lower diversity.
+
+### 4.3 QAOA-inspired multi-swap (`qaoa`)
+
+**Multi-swap** proposals (several swaps before one evaluation), analogous to a
+QAOA mixer perturbation, with greedy acceptance. Again purely classical.
 
 ---
 
-## 6. Theoretical Guarantees
+## 5. Fair-comparison protocol
 
-### 6.1 Optimality Certificate
+| Control | How it is enforced |
+|---------|--------------------|
+| Same randomness | every method re-instantiates `np.random.default_rng(seed)` with the same `seed`, so all start from the same random state (the stream then diverges only through the differing proposal/acceptance) |
+| Same budget | each method spends exactly `evals_per_perm` L-summary evaluations per permutation |
+| Same objective | all minimise `E(π) = ‖L(π) − L_target‖²` |
+| Honest reporting | report L(r) error **and** diversity **and** time; ratios are clamped |
 
-If SOS verification succeeds, we have:
-
-```
-f* ≥ f(θ*) - ε
-```
-
-Where f* is the true optimum, f(θ*) is our solution, and ε is the optimality gap.
-
-### 6.2 Convergence Analysis
-
-**Theorem**: Under standard conditions, the hybrid QI-SOP converges to a local optimum of L(r) with:
-
-```
-‖∇L(θₖ)‖ → 0  as k → ∞
-```
-
-**Proof Sketch**:
-1. The feasible set {θ: M(θ) ≽ 0} is closed and convex
-2. L(θ) is smooth and bounded below
-3. Projected gradient descent converges on convex sets
-
-### 6.3 Sample Complexity
-
-For ε-optimal solution with probability 1-δ:
-
-```
-N_samples ≥ O(log(1/δ) / ε²)
-```
+Complexity per L-summary evaluation is `O(N²)` (a pairwise distance sweep). With
+`P` permutations and `B` evaluations each, a method costs `O(P·B·N²)`, identical
+across the three strategies.
 
 ---
 
-## 7. Future Directions
+## 6. What is deliberately NOT here
 
-### 7.1 Quantum Hardware Migration
+- No quantum state, amplitude, Born rule, or measurement.
+- No Sum-of-Squares programming, SDP, or PSD certificate.
+- No intensity-model fitting, no R² regression, no neural network.
 
-Current work uses classical simulation. Future directions:
-
-1. **VQE (Variational Quantum Eigensolver)**: Run MPDO optimization on real quantum hardware
-2. **QAOA with real devices**: Implement on IBM Quantum or Rigetti
-3. **Quantum amplitude estimation**: Exponential speedup for gradient estimation
-
-### 7.2 Extensions
-
-1. **Multi-type events**: Dengue with multiple serotypes
-2. **Continuous time**: Hawkes process formulation
-3. **Causal inference**: Counterfactual prediction
-
-### 7.3 Open Problems
-
-1. **Tight optimality bounds**: Better SOS relaxation hierarchies
-2. **Quantum advantage threshold**: At what N does real quantum beat classical?
-3. **Robustness**: Adversarial perturbation analysis
+These appeared in earlier fabricated drafts and were removed to keep the theory
+in one-to-one correspondence with the code.
 
 ---
 
 ## References
 
-1. Parrilo, P. A. (2000). *Structured semidefinite programs and semialgebraic geometry methods in robustness and optimization*. PhD thesis, Caltech.
-
-2. Blekherman, G., Parrilo, P. A., & Thomas, R. R. (2012). *Semidefinite optimization and convex algebraic geometry*. SIAM.
-
-3. Farhi, E., Goldstone, J., & Gutmann, S. (2014). *A quantum approximate optimization algorithm*. arXiv:1411.4028.
-
-4. Benedetti, M., Realpe-Gómez, J., & Perdomo-Ortiz, A. (2019). *Quantum-born machine learning for spatial-temporal problems*. Physical Review X.
-
-5. Daley, D. J., & Vere-Jones, D. (2003). *An introduction to the theory of point processes*. Springer.
+1. Ripley, B. D. (1977). Modelling spatial patterns. *JRSS-B* 39(2), 172–212.
+2. Baddeley, A., Rubak, E. & Turner, R. (2015). *Spatial Point Patterns:
+   Methodology and Applications with R*. CRC Press.
+3. Mohler, G. & Mateu, J. (2024). Second-order preserving permutations. *Stat*.
+4. Mateu, J. (2025). *Statistical learning for spatio-temporal point processes*
+   (S7-ECSIA, Prague).
+5. Metropolis, N. et al. (1953). Equation of state calculations by fast
+   computing machines. *J. Chem. Phys.* 21, 1087.

@@ -1,204 +1,108 @@
-# Quantum-Dengue-STPP: Quantum-Enhanced Spatio-Temporal Point Processes for Dengue Outbreak Classification
+# Quantum-Dengue-STPP — v15 (corrected)
 
-**Hackathon Project — Quantum Computing × Public Health**
-**Aligned with Mateu ECSIA 2025 (Prague) keynote + 5 quantum algorithms from 2025-2026 papers**
+**Hackathon project (QC4SG) — spatio-temporal point processes for dengue.**
 
----
+Fair, reproducible comparison of three **classical** local-search strategies for
+generating Second-Order Preserving (SOP) permutations that augment
+spatio-temporal point-process data (Mohler & Mateu 2024).
 
-## ⚡ TL;DR
+> **This is a methods benchmark on *synthetic* space-time patterns, not a dengue
+> forecast.** Despite the project name, the pipeline does **not** read any dengue
+> surveillance data and has **not** been validated on real dengue outbreaks. The
+> synthetic Hawkes patterns are a stand-in to compare permutation-search methods.
+> Applying this to the OpenDengue-derived data in [`../dengue_dataset/`](../dengue_dataset/)
+> is future work.
 
-We built a **quantum-classical hybrid pipeline** for spatio-temporal point process (STPP) classification. Validated with **two distinct statistical tests** across 10 random seeds × 6 N values:
-
-- **Hybrid pipeline beats classical alone**: **+0.164** at N=900 (p < 0.0001, Cohen's d = +10.06) — robust at 6/6 N values
-- **Quantum kernel's marginal contribution**: +0.043 at N=150 (p = 0.0002) — significant at 2/6 N values, peaks at intermediate N
-- **Quantum alone at small N (v12 IQP kernel)**: +0.20 over classical at N=30 — proper quantum feature map
-- **5 quantum algorithms** from 2025-2026 papers: QBOOT preserves L-function 24% better
-
-**Honest scope**: Quantum helps at N=150-300 (intermediate) and N=30 (small). At N ≥ 600, classical+QAOA saturates and quantum adds nothing.
-
-📜 **See [DEVELOPMENT_HISTORY.md](DEVELOPMENT_HISTORY.md)** for the complete history of all 30 commits from initial exploration to v12 ROI verification.
-📊 **See [Q_STPP_V12_ROI_VERIFIED.md](Q_STPP_V12_ROI_VERIFIED.md)** for the honest two-test verdict.
-
----
-
-## 🎯 Research Question
-
-> Can quantum circuits extract features from spatial point patterns that improve **outbreak zoning** (1-NN classification) compared to classical CNNs?
-
-**Answer**: At N ≥ 150 patterns per class, yes — our hybrid pipeline achieves reproducible quantum advantage.
+> **Honest scope.** This version contains **no quantum hardware and no quantum
+> simulator** — everything is classical NumPy. Two of the three strategies are
+> *quantum-inspired* heuristics (Grover-/QAOA-inspired) but run no quantum
+> circuit, and **no quantum advantage is claimed**. Earlier versions (v9–v12)
+> that advertised a "quantum kernel" or large "quantum advantage" numbers, and a
+> v15 draft claiming "32.7× / 95.3% R²", have been **withdrawn** — see
+> [DEVELOPMENT_HISTORY.md](DEVELOPMENT_HISTORY.md).
 
 ---
 
-## 📊 Latest Results
+## What it does
 
-### Hybrid Pipeline (v9) — Quantum Advantage Emerges at N ≥ 150
+For a synthetic Hawkes-like space-time pattern, it generates SOP permutations
+with three methods under a strictly fair protocol (same seed, same evaluation
+budget) and reports **two** metrics:
 
-| N | Classical K | Quantum Kernel | XY-QAOA SOP | **HYBRID v9** | Δ |
-|---|-------------|----------------|-------------|---------------|---|
-| 30 | 0.60 | 0.33 | - | 0.53 | -0.07 |
-| 60 | 0.82 | 0.63 | - | 0.65 | -0.17 |
-| **150** | **0.69** | **0.54** | **0.85** | **0.88** | **+0.19 ★** |
-| **300** | **0.73** | **0.38** | **0.85** | **0.84** | **+0.11 ★** |
-| **600** | **0.71** | **0.38** | **0.85** | **0.83** | **+0.12 ★** |
+- **L(r) error** — how well each permutation preserves Ripley's L-function
+  (lower is better);
+- **set diversity** — how different the generated permutations are from each
+  other (higher is better; a collapsed set is useless for augmentation).
 
-### Quantum Algorithm Zoo (v10)
+| Key | Method | Proposal | Acceptance |
+|-----|--------|----------|------------|
+| `mh` | Metropolis-Hastings | single swap | Metropolis, annealed temperature |
+| `grover` | Grover-inspired | single swap | greedy |
+| `qaoa` | QAOA-inspired | multi swap | greedy |
 
-| Algorithm | Source | Quantum Wins? |
-|-----------|--------|----------------|
-| QBOOT (Quantum Bootstrap) | arXiv 2604.00951 (2026) | **★ 24% better SOP preservation** |
-| Quantum Amplitude Estimation | Quantinuum QMCI | Industrial framework |
-| QFT over Symmetric Group | arXiv 2603.22401 (2026) | Super-exp speedup |
-| Two-Step Quantum Search | IEEE TQE 2025 | Constrained search |
-| Grover Adaptive Search | IEEE TQE 2026 | Penalty-free, NISQ |
+The expected result is a **quality–diversity trade-off**, not a single winner.
 
 ---
 
-## 📁 Project Structure
+## Quick start
+
+```bash
+pip install numpy scipy matplotlib
+
+# defaults: seeds 1..5, N ∈ {20,30,50}, 10 perms, 200 evals/perm/method
+python3 run_q_stpp_v15_fair.py
+
+# or use the wrapper
+./run.sh
+```
+
+Outputs:
+
+- `output_result/q_stpp_v15_fair/fair_comparison_results.json`
+- `output_result/q_stpp_v15_fair/fair_comparison_plot.png`
+
+Runtime: a few seconds per (seed, N) cell on a laptop CPU. No GPU, no quantum
+backend.
+
+---
+
+## Project structure
 
 ```
 quantum-dengue-stpp/
-├── README.md                 # This file
-├── ARCHITECTURE.md           # System architecture (current)
-├── THEORY.md                 # Mathematical foundations
-│
-├── run_q_stpp_v9.py          # ★ Hybrid pipeline (production)
-├── run_q_stpp_v10.py         # ★ Quantum Algorithm Zoo (5 algos)
-│
-├── Q_STPP_V9_REPORT.md       # Hybrid pipeline report
-├── Q_STPP_V10_REPORT.md      # Algorithm zoo report
-│
-├── src/                      # Core modules
-│   ├── data/                 # loader.py
-│   ├── models/               # cnn_lstm.py
-│   ├── augmentation/         # SOP variants
-│   ├── evaluation/           # spatial_stats.py
-│   └── ...
-│
+├── run_q_stpp_v15_fair.py   # the entire pipeline
+├── run.sh                   # convenience wrapper
+├── requirements.txt         # numpy, scipy, matplotlib
+├── README.md                # this file
+├── ARCHITECTURE.md          # system design (matches the code)
+├── THEORY.md                # L-function + local-search background
+├── Q_STPP_V15_REPORT.md     # methodology + results template
+├── DEVELOPMENT_HISTORY.md   # history incl. withdrawn claims
 ├── output_result/
-│   ├── q_stpp_v9/            # Hybrid pipeline results
-│   └── q_stpp_v10/           # Algorithm zoo results
-│
-└── archive/                  # Previous versions (v4-v8)
+│   ├── data/                # legacy CSVs from earlier versions — NOT used by v15
+│   └── q_stpp_v15_fair/     # results.json + plot.png (created by a run)
+└── archive/                 # withdrawn / superseded versions (v4–v12)
 ```
 
 ---
 
-## 🚀 Quick Start
+## What this does and does NOT claim
 
-```bash
-# Install
-pip install pennylane scikit-learn numpy matplotlib
+**Does**: a controlled, same-budget comparison of three classical permutation
+search heuristics, reporting both L(r) preservation and augmentation diversity.
 
-# Run hybrid pipeline (single N)
-python3 run_q_stpp_v9.py --mode single --n_per_class 20
-
-# Run scaling test (N=30 to 600)
-python3 run_q_stpp_v9.py --mode scaling
-
-# Run quantum algorithm zoo
-python3 run_q_stpp_v10.py --n_per_class 20
-```
-
-Runtime: 2-10 seconds per benchmark on PennyLane simulator.
+**Does not**: run any quantum circuit, show a quantum advantage, or validate on
+real dengue surveillance data.
 
 ---
 
-## 🏗️ Architecture Overview
+## References
 
-```
-DATA → Discretize (12×12 grid)
-            ↓
-   ┌────────┴────────┐
-   ↓                 ↓
-Classical K    Quantum Hilbert
-features       kernel features
-   ↓                 ↓
-   └────────┬────────┘
-            ↓
-   ┌────────┴────────┐
-   ↓                 ↓
-XY-QAOA SOP     QBOOT
-(permutations)  (bootstrap)
-   ↓                 ↓
-   └────────┬────────┘
-            ↓
-      HYBRID CLASSIFIER
-      (weighted voting)
-            ↓
-      Classification
-```
+- Mateu, J. (2025). *Statistical learning for spatio-temporal point processes*
+  (S7-ECSIA, Prague).
+- Mohler, G. & Mateu, J. (2024). Second-order preserving permutations. *Stat*.
+- Ripley, B. D. (1977). Modelling spatial patterns. *JRSS-B*.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full system design.
+## License
 
----
-
-## 📐 Theory
-
-Our approach is grounded in:
-1. **Classical STPP**: Ripley's K-function (Mateu 2025 baseline)
-2. **Quantum kernels**: Hilbert space projection + pairwise interactions
-3. **SOP permutations**: Mohler-Mateu 2024, augmented quantum-generatively
-4. **5 quantum algorithms**: From 2025-2026 papers
-
-See [THEORY.md](THEORY.md) for full mathematical framework.
-
----
-
-## 📚 Key References
-
-### Classical Foundation
-- **Mateu 2025** (S7-ECSIA-Prague) — Statistical learning for STPP
-- **Mohler & Mateu 2024** (Stat) — SOP permutations
-- **Jalilian & Mateu 2023** (ADAC 17, 21-42) — Siamese CNN for spatial patterns
-
-### Quantum Algorithms
-- **Chen, Ma, Zhong 2026** (arXiv 2604.00951) — Quantum Bootstrap
-- **arXiv 2603.22401 (2026)** — Probabilistic modeling over permutations
-- **Zhang et al. 2025** (IEEE TQE) — Two-Step Quantum Search
-- **Grover Adaptive Search** (IEEE TQE 2026)
-- **Quantinuum QMCI** (2023) — Quantum Amplitude Estimation
-
----
-
-## 🎓 Honest Findings
-
-### What We Prove
-✅ Hybrid pipeline > best individual at N ≥ 150 (+0.11 to +0.19)
-✅ QBOOT preserves L-function 24% better than classical
-✅ Quantum advantage is reproducible on synthetic STPP data
-✅ 5 quantum algorithms implementable on NISQ hardware
-
-### What We Acknowledge
-⚠️ Quantum Hilbert projection alone is weak (~0.33-0.55)
-⚠️ Classical K-function wins at N < 100 (Mateu 2025 confirms)
-⚠️ Real dengue data validation pending
-⚠️ Linear ensembles underperform; decision voting needed
-
----
-
-## 📜 Version History
-
-| Version | Date | Focus | Status |
-|---------|------|-------|--------|
-| v4 | 2026-07 | R² regression QIG | archived |
-| v5 | 2026-07 | R² regression (refined) | archived |
-| v6 | 2026-07 | Siamese CNN 1-NN | archived |
-| v7 | 2026-07 | XY-QAOA SOP | archived |
-| v8 | 2026-07 | Linear hybrid | archived |
-| **v9** | **2026-07-16** | **Smart hybrid (current)** | **ACTIVE** |
-| **v10** | **2026-07-16** | **5 quantum algorithms** | **ACTIVE** |
-| **v11** | **2026-07-16** | **Architecture synthesis** | **ACTIVE** |
-
----
-
-## 📄 License
-
-Hackathon project. MIT License.
-
----
-
-## 🤝 Acknowledgments
-
-- **Jorge Mateu** (University Jaume I) for the S7-ECSIA 2025 keynote that grounded this work
-- **QC4SG Hackathon** organizers
-- Open-source: PennyLane, scikit-learn, NumPy, Matplotlib
+MIT (hackathon project).

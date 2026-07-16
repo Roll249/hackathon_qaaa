@@ -4,6 +4,7 @@ Comprehensive Exploratory Data Analysis for Dengue Dataset - Enhanced Version
 Southeast Asia Dengue Surveillance Data
 """
 
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,6 +12,9 @@ import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator
 import warnings
 warnings.filterwarnings('ignore')
+
+# Run relative to this script's directory so paths are portable.
+os.chdir(os.path.dirname(os.path.abspath(__file__)) or '.')
 
 # Set up plotting style
 plt.style.use('seaborn-v0_8-whitegrid')
@@ -25,9 +29,9 @@ print("="*80)
 # Load all three files
 print("\n[1] LOADING DATA FILES...")
 
-df_spatial = pd.read_csv('/home/khang/Work/hackathon/dengue_dataset/sea_dengue_spatial.csv')
-df_long = pd.read_csv('/home/khang/Work/hackathon/dengue_dataset/sea_dengue_admin1_month.csv')
-df_pivot = pd.read_csv('/home/khang/Work/hackathon/dengue_dataset/sea_dengue_admin1_month_pivot.csv')
+df_spatial = pd.read_csv('sea_dengue_spatial.csv')
+df_long = pd.read_csv('sea_dengue_admin1_month.csv')
+df_pivot = pd.read_csv('sea_dengue_admin1_month_pivot.csv')
 
 print(f"sea_dengue_spatial.csv: {df_spatial.shape[0]:,} rows x {df_spatial.shape[1]} columns")
 print(f"sea_dengue_admin1_month.csv: {df_long.shape[0]:,} rows x {df_long.shape[1]} columns")
@@ -182,7 +186,7 @@ ax4.set_ylabel('Total Cases (Millions)')
 ax4.set_title('Top 10 Outbreak Years (2010-2022)')
 
 plt.tight_layout()
-plt.savefig('/home/khang/Work/hackathon/dengue_dataset/figures/overview.png', dpi=150, bbox_inches='tight')
+plt.savefig('figures/overview.png', dpi=150, bbox_inches='tight')
 print("Saved: figures/overview.png")
 
 # Figure 2: Per-country analysis
@@ -212,7 +216,7 @@ for idx, (country, data) in enumerate(sorted(country_analysis.items())):
         ax.tick_params(axis='x', rotation=45)
 
 plt.tight_layout()
-plt.savefig('/home/khang/Work/hackathon/dengue_dataset/figures/country_trends.png', dpi=150, bbox_inches='tight')
+plt.savefig('figures/country_trends.png', dpi=150, bbox_inches='tight')
 print("Saved: figures/country_trends.png")
 
 # Figure 3: Monthly patterns
@@ -240,7 +244,7 @@ for idx, (country, data) in enumerate(sorted(country_analysis.items())):
         ax.set_xticklabels(month_names)
 
 plt.tight_layout()
-plt.savefig('/home/khang/Work/hackathon/dengue_dataset/figures/monthly_patterns.png', dpi=150, bbox_inches='tight')
+plt.savefig('figures/monthly_patterns.png', dpi=150, bbox_inches='tight')
 print("Saved: figures/monthly_patterns.png")
 
 # ==============================================================================
@@ -292,7 +296,7 @@ events_df = pd.DataFrame(sample_events)
 print(f"Generated {len(events_df)} simulated point events")
 
 # Save events
-events_df.to_csv('/home/khang/Work/hackathon/dengue_dataset/simulated_point_events.csv', index=False)
+events_df.to_csv('simulated_point_events.csv', index=False)
 print("Saved: simulated_point_events.csv")
 
 # Figure 4: Geographic distribution
@@ -313,7 +317,7 @@ ax4.set_xlim(90, 145)
 ax4.set_ylim(-15, 30)
 
 plt.tight_layout()
-plt.savefig('/home/khang/Work/hackathon/dengue_dataset/figures/point_locations.png', dpi=150, bbox_inches='tight')
+plt.savefig('figures/point_locations.png', dpi=150, bbox_inches='tight')
 print("Saved: figures/point_locations.png")
 
 # ==============================================================================
@@ -340,7 +344,7 @@ summary_df = pd.DataFrame(summary_data)
 print("\n", summary_df.to_string(index=False))
 
 # Save summary
-summary_df.to_csv('/home/khang/Work/hackathon/dengue_dataset/country_summary.csv', index=False)
+summary_df.to_csv('country_summary.csv', index=False)
 print("\nSaved: country_summary.csv")
 
 print("\n" + "="*80)

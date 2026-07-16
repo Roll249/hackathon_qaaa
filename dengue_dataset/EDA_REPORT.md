@@ -1,17 +1,17 @@
 # Exploratory Data Analysis Report: Southeast Asia Dengue Surveillance Dataset
 
 **Analysis Date:** May 30, 2026  
-**Dataset Location:** `/home/khang/Work/hackathon/dengue_dataset/`
+**Dataset Location:** `dengue_dataset/` (relative to the repository root)
 
 ---
 
 ## Executive Summary
 
-This report presents a comprehensive exploratory data analysis of the Southeast Asia Dengue Surveillance Dataset, covering dengue case data across 8 countries from 1955 to 2022. The dataset contains over **20.7 million cumulative dengue cases** across the region, with significant temporal and geographic variation.
+This report presents a comprehensive exploratory data analysis of the Southeast Asia Dengue Surveillance Dataset, from 1955 to 2022. Coverage differs by table: the **spatial** table (`sea_dengue_spatial.csv`) spans **11 countries**, while the **admin1-month** subset (`sea_dengue_admin1_month.csv`) spans **8 countries** (those with full Admin1/Month resolution). The dataset contains over **20.7 million cumulative dengue cases** across the region, with significant temporal and geographic variation.
 
 **Key Findings:**
 - Total of 69,595 spatial records and 55,030 monthly administrative records
-- 8 countries with 233 unique administrative regions
+- **Spatial: 11 countries** · **admin1-month: 8 countries** with 233 unique Admin1 regions
 - Peak epidemic year: 2019 with 2.18 million cases
 - Strong seasonal patterns with peak transmission typically during rainy season (May-October)
 - Thailand and Vietnam account for the majority of cases in the monthly dataset
@@ -59,7 +59,11 @@ This report presents a comprehensive exploratory data analysis of the Southeast 
 
 ### 2.1 Countries Included
 
-The dataset covers 8 countries in Southeast Asia (plus 3 additional countries in the spatial data):
+The **spatial** table covers **11 countries**; the **admin1-month** subset covers
+**8** of them (the ones with full Admin1/Month resolution — the other 3 appear only
+in the spatial table). In the table below, a "-" in the *Monthly Records* / *Regions*
+columns marks a country that is present in the spatial data but not in the
+admin1-month subset:
 
 | Country | Spatial Records | Monthly Records | Regions |
 |---------|-----------------|----------------|---------|
@@ -73,6 +77,7 @@ The dataset covers 8 countries in Southeast Asia (plus 3 additional countries in
 | SINGAPORE | 1,307 | 216 | 1 |
 | THAILAND | 33,763 | 33,720 | 77 |
 | TIMOR-LESTE | 118 | 45 | 9 |
+| VIET NAM | 12,564 | 12,273 | 64 |
 | VIET NAM | 12,564 | 12,273 | 64 |
 
 ### 2.2 Administrative Regions
@@ -394,7 +399,7 @@ Generated events include:
 
 ## 10. Visualizations
 
-Generated visualization files (saved to `/home/khang/Work/hackathon/dengue_dataset/figures/`):
+Generated visualization files (saved to `dengue_dataset/figures/`):
 
 | File | Description |
 |------|-------------|
