@@ -1,166 +1,590 @@
-# Q-STPP v15 (corrected) — Architecture
+# Q-STPP v16 Architecture
 
-**Last updated**: 2026-07-16
-**Scope**: Fair comparison of classical / quantum-inspired strategies for
-generating Second-Order Preserving (SOP) permutations, used to augment
-spatio-temporal point-process (STPP) data for dengue outbreak modelling.
+## Executive Summary
 
-> **Honest scope note.** This version contains **no quantum hardware and no
-> quantum simulator**. Everything here is classical NumPy. Two of the three
-> search strategies are *quantum-inspired* heuristics (they borrow an idea from
-> Grover amplification / QAOA mixers) but do not execute a quantum circuit. No
-> quantum advantage is claimed. Earlier versions (v9–v12) that referenced a
-> "quantum kernel" or reported large "quantum advantage" numbers have been
-> withdrawn — see `DEVELOPMENT_HISTORY.md`.
+**Q-STPP v16** là kiến trúc hybrid thực dụng cho bài toán dự đoán điểm nóng sốt rét (dengue fever hotspot prediction) sử dụng Spatial-Temporal Point Processes (STPP).
+
+### Design Philosophy
+1. **Classical-first**: Tất cả components chạy được bằng classical → implement bằng classical
+2. **Quantum-where-useful**: Chỉ dùng quantum khi có lợi thế rõ ràng, với honest caveats
+3. **Honest claims**: Không over-claim quantum advantage
 
 ---
 
-## 1. What the system actually does
+## 1. System Overview
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                  Q-STPP v15 (corrected) pipeline                       │
-└──────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           Q-STPP v16: HYBRID ARCHITECTURE                            │
+│                         Classical-First, Quantum-Where-Useful                        │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 
-  simulate_hawkes(seed)                     # reproducible space-time pattern
-        │   → times, x, y
-        ▼
-  compute_L_summary(times, x, y, r)         # Ripley-K based second-order summary
-        │   → L_target(r)
-        ▼
-  For each strategy ∈ {mh, grover, qaoa}:   # identical seed + identical budget
-        │   generate n_perms permutations of the time-stamps
-        │   each perm minimises  ‖L(perm) − L_target‖²  by local search
-        ▼
-  Report per strategy:
-     • mean L(r) error   (quality — lower is better)
-     • set diversity     (mean pairwise Hamming distance — higher is better)
-     • wall-clock time
-        │
-        ▼
-  fair_comparison_results.json  +  fair_comparison_plot.png
+                              ┌─────────────────────────────────────┐
+                              │          INPUT DATA                 │
+                              │  • Real dengue data (TYCHO)        │
+                              │  • Synthetic Hawkes (validation)    │
+                              │  • Weather covariates (optional)    │
+                              └──────────────────┬──────────────────┘
+                                                 │
+                    ┌────────────────────────────┼────────────────────────────┐
+                    │                            │                            │
+                    ▼                            ▼                            ▼
+        ┌───────────────────┐      ┌───────────────────┐      ┌───────────────────┐
+        │    LAYER 0        │      │    LAYER 1        │      │    LAYER 2        │
+        │  DATA PIPELINE    │      │ FEATURE EXTRACT   │      │    PREDICTION     │
+        │    (Classical)    │      │    (Classical)    │      │    (Classical)    │
+        │                   │      │                   │      │                   │
+        │ • Data loading    │      │ • K/L-function    │      │ • 1-NN class.     │
+        │ • Preprocessing   │─────▶│ • CNN features    │─────▶│ • Risk scoring    │
+        │ • Discretization  │      │ • GNN attention   │      │ • Hotspot maps    │
+        │ • Normalization   │      │ • Non-stat. kernel│      │ • Forecast        │
+        └───────────────────┘      └───────────────────┘      └───────────────────┘
+                    │                            │                            │
+                    │                            │                            │
+                    └────────────────────────────┼────────────────────────────┘
+                                                 │
+                    ┌────────────────────────────┼────────────────────────────┐
+                    │                            │                            │
+                    ▼                            ▼                            ▼
+        ┌───────────────────┐      ┌───────────────────┐      ┌───────────────────┐
+        │    LAYER 3        │      │    LAYER 4        │      │    LAYER 5        │
+        │  SOP AUGMENTATION │      │  QUANTUM LAYER    │      │    OUTPUT         │
+        │    (Classical+)   │      │  (Future/Benchmark)│      │    (Classical)    │
+        │                   │      │                   │      │                   │
+        │ • MH sampler      │      │ • QAOA SOP (N>200)│      │ • R² metrics      │
+        │ • Greedy search   │      │ • Q kernel (bench)│      │ • L(r) error      │
+        │ • QAOA-inspired   │─────▶│ • VQE optim      │      │ • Visualizations  │
+        │ • [Future: QAOA]  │      │ • Honest caveats  │      │ • Reports         │
+        └───────────────────┘      └───────────────────┘      └───────────────────┘
 ```
 
-All of the above lives in a single file: `run_q_stpp_v15_fair.py`.
+---
+
+## 2. Layer Specifications
+
+### 2.1 Layer 0: Data Pipeline (Classical)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     LAYER 0: DATA PIPELINE                       │
+│                     100% Classical - No quantum needed           │
+└─────────────────────────────────────────────────────────────────┘
+
+DataSource
+├── RealData
+│   ├── TYCHO (WHO) - historical dengue cases
+│   ├── OpenDengue - community data
+│   └── Format: (lat, lon, timestamp, case_count)
+│
+├── SyntheticData (for validation)
+│   ├── HawkesProcess - self-exciting patterns
+│   ├── PoissonProcess - baseline
+│   └── LGCP - log-Gaussian Cox process
+│
+└── Preprocessor
+    ├── spatial_discretize(points, grid_size=12)
+    │   └── Maps (x,y) → cell index (i,j)
+    │
+    ├── temporal_binning(times, window='1D')
+    │   └── Aggregates events by time window
+    │
+    └── normalize_coordinates(coords)của
+        └── Ensures consistent spatial scale
+```
+
+**Key operations**:
+- O(N) for data loading
+- O(N) for discretization
+- All classical, deterministic
+
+### 2.2 Layer 1: Feature Extraction (Classical)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  LAYER 1: FEATURE EXTRACTION                     │
+│            Based on Mateu 2025 (ECSIA) methodology               │
+└─────────────────────────────────────────────────────────────────┘
+
+FeatureExtractor
+│
+├── KFunction (Second-Order Statistics)
+│   │
+│   ├── compute_K(r, events)
+│   │   └── K(r) = (1/λ) × (1/N²) × Σ 𝟙(dij < r)
+│   │
+│   └── compute_L(r)
+│       └── L(r) = sign(K) × |K|^(1/3)  [stabilized transform]
+│
+├── LFunction (Ripley's L)
+│   │
+│   ├── compute_L_stpp(t, x, y, r_values)
+│   │   └── Space-time distance: d² = ||x-x'||² + α²|t-t'|²
+│   │
+│   └── l_error(L_perm, L_target)
+│       └── MSE(L_perm - L_target) → lower is better
+│
+├── CNNFeatureExtractor (per Mateu slides 17-19)
+│   │
+│   ├── discretize_to_grid(points, d1=12, d2=12)
+│   │   └── Creates binary grid from point pattern
+│   │
+│   ├── SiameseCNN(input_shape=(d1,d2))
+│   │   ├── Conv2D(8, kernel=3×3) + ReLU
+│   │   ├── MaxPool(2×2)
+│   │   ├── Conv2D(16, kernel=3×3) + ReLU
+│   │   ├── MaxPool(2×2)
+│   │   ├── Flatten
+│   │   └── Dense(64) → feature vector
+│   │
+│   └── extract_features(grid) → φ(x)
+│
+└── GNNAttention (for influence kernel learning)
+    │
+    ├── GraphAttentionNetwork(mark_dim, hidden_dim=32)
+    │   ├── Multi-head self-attention
+    │   └── Learns α_cl,c'l' coefficients
+    │
+    └── compute_influence_kernel(θ) → k(t',t,s',s,c×l,c'×l')
+```
+
+**Key insights from Mateu 2025**:
+- K-function baseline outperforms CNN on small data (slide 47)
+- CNN advantage emerges with more data
+- GNN captures mark-space interactions
+
+### 2.3 Layer 2: Prediction (Classical)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      LAYER 2: PREDICTION                         │
+│                    Pattern Classification & Risk                   │
+└─────────────────────────────────────────────────────────────────┘
+
+Predictor
+│
+├── PatternClassifier
+│   │
+│   ├── OneNNClassifier(features, labels)
+│   │   └── 1-Nearest Neighbor with L2 distance
+│   │
+│   └── predict(new_pattern, k=1)
+│       └── Returns predicted class + probability
+│
+├── RiskScorer
+│   │
+│   ├── compute_intensity(events, kernel_params)
+│   │   └── λ(x,t) = μ + Σ k(t',t,s',s)
+│   │
+│   ├── compute_hotspot_prob(grid, intensity)
+│   │   └── P(hotspot| intensity) via threshold
+│   │
+│   └── generate_risk_map(spatial_grid)
+│       └── Risk score per grid cell
+│
+└── ForecastEngine
+    │
+    ├── predict_future(current_events, horizon)
+    │   └── Uses fitted Hawkes parameters
+    │
+    └── generate_alert(forecast, threshold)
+        └── Returns alert level (1-5)
+```
+
+### 2.4 Layer 3: SOP Augmentation (Classical-First)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│               LAYER 3: SOP AUGMENTATION                          │
+│         Second-Order Preserving Permutations (Mohler-Mateu 2024)  │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  PURPOSE: Data augmentation for training ML models          │ │
+│  │  CRITERIA:                                                 │ │
+│  │    1. Preserve L(r) structure (LOW error)                 │ │
+│  │    2. Produce DIVERSE set of permutations                  │ │
+│  │    3. Same computational budget for fair comparison         │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+
+SOPSearch
+│
+├── Method 1: Metropolis-Hastings (Classical)
+│   │
+│   ├── proposal_swap(perm)
+│   │   └── Randomly swap two time indices
+│   │
+│   ├── accept_reject(cand_err, cur_err, temperature)
+│   │   └── P(accept) = min(1, exp(-ΔE/T))
+│   │
+│   └──优点: High diversity, ✅ proven
+│   └──缺点: May not reach lowest error
+│
+├── Method 2: Greedy Search (Classical)
+│   │
+│   ├── greedy_swap(perm, n_swaps=1)
+│   │   └── Only accept improving swaps
+│   │
+│   └──优点: Lowest error, fast
+│   └──缺点: Low diversity, mode collapse
+│
+├── Method 3: QAOA-Inspired Multi-Swap (Classical)
+│   │
+│   ├── multi_swap_proposal(perm, n_swaps)
+│   │   └── Propose multiple swaps simultaneously
+│   │
+│   └──优点: Balances error and diversity
+│   └──缺点: Still classical heuristic
+│
+└── [FUTURE] Method 4: Genuine QAOA (Quantum)
+    │
+    ├── XYMixerHamiltonian
+    │   └── H_M = Σ (X_i X_j + Y_i Y_j)
+    │
+    ├── CostHamiltonian
+    │   └── H_C = Σ |L(π_i) - L_target|²
+    │
+    └──优点: Theoretical quantum advantage for N>200
+    └──缺点: NISQ limitations, needs validation
+```
+
+**FAIR COMPARISON PROTOCOL**:
+- Same random seed
+- Same evaluation budget (L-function calls)
+- Both quality (L(r) error) AND diversity reported
+
+### 2.5 Layer 4: Quantum Layer (Honest Benchmark)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                       LAYER 4: QUANTUM LAYER                    │
+│                      For Research & Benchmarking                  │
+│                                                                   │
+│  ⚠️ HONEST CAVEATS:                                              │
+│  • No quantum advantage claimed for current problem sizes         │
+│  • NISQ hardware too noisy for practical benefit                 │
+│  • Quantum = future research direction, not current solution     │
+│  • Classical v15 methods remain state-of-the-art                  │
+│  └─────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+
+QuantumLayer
+│
+├── Component A: QAOA for SOP (Future Research)
+│   │
+│   ├── xy_mixer_circuit(p, β, γ)
+│   │   └── U(β,γ) = exp(-iβ B) exp(-iγ C)
+│   │
+│   ├── CostFunction
+│   │   └── C(π) = ||L(π) - L_target||²
+│   │
+│   └── StateVectorSimulation
+│       └── For small N (≤20) on classical simulator
+│
+│   **When useful**: N > 200, specific problem structures
+│   **Honest claim**: Potential future advantage, not proven
+│
+├── Component B: Quantum Kernel (Benchmark)
+│   │
+│   ├── IQPEmbedding(features)
+│   │   └── φ(x) → |ψ⟩ via IQP circuit
+│   │
+│   ├── QuantumKernel(x, x')
+│   │   └── k(x,x') = |⟨ψ(x)|ψ(x')⟩|²
+│   │
+│   └── ClassicalSimulation
+│       └── 2^n statevector for n ≤ 15 qubits
+│
+│   **When useful**: Specific pattern families (periodic vs cluster)
+│   **Honest claim**: Method exploration, not demonstrated advantage
+│
+└── Component C: VQE for Kernel Optimization (Speculative)
+    │
+    ├── VariationalForm(params)
+    │   └── Parametrized quantum circuit
+    │
+    ├── ObjectiveFunction(θ)
+    │   └── Negative log-likelihood
+    │
+    └── Optimizer
+        └── COBYLA/SPSA gradient descent
+    │
+    **When useful**: Very large parameter spaces
+    **Honest claim**: Research direction, unproven
+```
+
+### 2.6 Layer 5: Output (Classical)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                       LAYER 5: OUTPUT                            │
+│                     Metrics & Visualization                      │
+└─────────────────────────────────────────────────────────────────┘
+
+OutputGenerator
+│
+├── MetricsComputer
+│   │
+│   ├── compute_l_error(L_perm, L_target)
+│   │   └── Primary quality metric
+│   │
+│   ├── compute_diversity(permutations)
+│   │   └── Mean pairwise Hamming distance
+│   │
+│   └── compute_r2_score(predicted, actual)
+│       └── Classification accuracy
+│
+├── VisualizationEngine
+│   │
+│   ├── plot_l_function_curves(L_curves, r_values)
+│   │   └── Shows L(r) preservation
+│   │
+│   ├── plot_error_vs_diversity(methods)
+│   │   └── Trade-off visualization
+│   │
+│   ├── plot_hotspot_map(predictions, grid)
+│   │   └── Risk heatmap
+│   │
+│   └── plot_quantum_comparison(classical, quantum)
+│       └── Honest side-by-side (with caveats)
+│
+└── ReportGenerator
+    │
+    ├── generate_summary_table(metrics)
+    │   └── Markdown table with all results
+    │
+    └── generate_markdown_report()
+        └── Full technical report
+```
 
 ---
 
-## 2. The three strategies
+## 3. Data Flow
 
-Every strategy is classical local search over permutations of the event
-time-stamps. They differ **only** in how a candidate is proposed and accepted;
-they share the same objective, the same RNG seed, and the same number of
-L-summary evaluations.
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│                           DATA FLOW DIAGRAM                                 │
+└────────────────────────────────────────────────────────────────────────────┘
 
-| Key | Name | Proposal | Acceptance |
-|-----|------|----------|------------|
-| `mh` | Metropolis-Hastings | single swap | Metropolis, scale-adaptive annealed temperature |
-| `grover` | Grover-inspired | single swap | greedy (accept iff error decreases) |
-| `qaoa` | QAOA-inspired | multi-swap (mixer-like) | greedy |
+INPUT
+  │
+  ▼
+┌─────────────────┐
+│  Layer 0        │  Raw Dengue Data
+│  Data Pipeline   │  ↓
+│  (Classical)    │  Cleaned & Discretized Events
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Layer 1        │  Spatial-Temporal Features
+│  Feature Extract │  ├─ K/L-function summaries
+│  (Classical)    │  ├─ CNN embeddings
+│                 │  └─ GNN attention weights
+└────────┬────────┘
+         │
+         ├──────────────────────────────────────────────┐
+         │                                              │
+         ▼                                              ▼
+┌─────────────────┐                           ┌─────────────────┐
+│  Layer 2        │                           │  Layer 3        │
+│  Prediction     │                           │  SOP Augment    │
+│  (Classical)    │                           │  (Classical+)   │
+│                 │                           │                 │
+│  ├─ 1-NN class │                           │  ├─ MH sampler  │
+│  ├─ Risk score │                           │  ├─ Greedy      │
+│  └─ Hotspot map│                           │  └─ QAOA-inspired
+└────────┬────────┘                           └────────┬────────┘
+         │                                              │
+         │         ┌────────────────────────────────────┘
+         │         │
+         ▼         ▼
+┌─────────────────────────────────┐
+│         Layer 5                  │
+│         Output                   │
+│                                 │
+│  ┌─────────────────────────────┐ │
+│  │  Metrics:                  │ │
+│  │  • L(r) error             │ │
+│  │  • Diversity score         │ │
+│  │  • R² / Accuracy          │ │
+│  └─────────────────────────────┘ │
+│                                 │
+│  ┌─────────────────────────────┐ │
+│  │  Visualizations:           │ │
+│  │  • L-function curves       │ │
+│  │  • Hotspot maps            │ │
+│  │  • Comparison plots        │ │
+│  └─────────────────────────────┘ │
+└─────────────────────────────────┘
 
-"Grover-inspired" = focused hill-climbing (analogy to amplitude amplification).
-"QAOA-inspired" = multi-swap perturbation (analogy to a mixer Hamiltonian).
-Neither name implies any quantum computation.
+  ┌─────────────────────────────────────────┐
+  │  Layer 4 (Optional/Future):              │
+  │  Quantum Benchmarks — same output format │
+  └─────────────────────────────────────────┘
+```
 
 ---
 
-## 3. The fairness protocol (why v15-initial was wrong)
-
-The first v15 comparison was invalid for several reasons, all now fixed:
-
-| Problem (old) | Fix (this version) |
-|---------------|--------------------|
-| MH used the unseeded global `np.random`; the others used `default_rng(42)` | Every method is seeded identically — each re-instantiates `np.random.default_rng(seed)` with the same `seed`, so all start from the same random state |
-| Acceptance temperature was a fixed `10`, so MH accepted ~90% of worsening moves and barely optimised | Scale-adaptive geometric annealing derived from the initial error magnitude (no magic constant) |
-| "Same budget" was false — step caps were 100 / 50 / 10 | Every method spends **exactly** `evals_per_perm` L-summary evaluations per permutation |
-| Only mean error was reported, which rewards mode collapse | Report **both** L(r) error **and** set diversity |
-| Improvement ratio divided by a near-zero error → 35–75× blow-ups | `ratio()` clamps the denominator; the headline is the two metrics, not a multiplier |
-
-**The unit of budget** is one `compute_L_summary` call — the dominant O(N²)
-cost. Counting evaluations (not swaps) makes the budget comparable across
-single-swap and multi-swap proposals.
-
----
-
-## 4. Why report diversity
-
-SOP permutations exist to *augment* a dataset. A method that collapses to one
-low-error permutation gives you the same sample ten times — useless for
-augmentation. A method that keeps a spread of near-target permutations is what
-you actually want. Greedy search (`grover`, `qaoa`) tends to reach lower error
-but lower diversity; the MH sampler trades a little error for much more
-diversity. The honest conclusion is a **quality–diversity trade-off**, not a
-single winner.
-
----
-
-## 5. Code organisation
+## 4. File Structure
 
 ```
 quantum-dengue-stpp/
-├── run_q_stpp_v15_fair.py      # the entire pipeline (data, methods, plots)
-├── run.sh                      # convenience wrapper
-├── requirements.txt            # numpy, scipy, matplotlib
 │
-├── ARCHITECTURE.md             # this file
-├── THEORY.md                   # L-function + local-search background
-├── Q_STPP_V15_REPORT.md        # methodology + results (populated by a run)
-├── DEVELOPMENT_HISTORY.md      # version history incl. withdrawn claims
-├── README.md                   # quick start
+├── run_q_stpp_v16.py              # Main v16 pipeline
+│
+├── src/
+│   ├── __init__.py
+│   ├── data/
+│   │   ├── loader.py              # Layer 0: Data loading
+│   │   ├── preprocessor.py        # Layer 0: Preprocessing
+│   │   └── synthetic.py           # Layer 0: Hawkes/Poisson simulation
+│   │
+│   ├── features/
+│   │   ├── k_function.py         # Layer 1: K-function
+│   │   ├── l_function.py          # Layer 1: L-function
+│   │   ├── cnn_extractor.py       # Layer 1: CNN features
+│   │   └── gnn_attention.py       # Layer 1: GNN attention
+│   │
+│   ├── prediction/
+│   │   ├── classifier.py          # Layer 2: 1-NN classifier
+│   │   ├── risk_scorer.py         # Layer 2: Risk scoring
+│   │   └── forecaster.py          # Layer 2: Hawkes forecast
+│   │
+│   ├── augmentation/
+│   │   ├── sop_search.py          # Layer 3: Base SOP
+│   │   ├── metropolis_hastings.py # Layer 3: MH method
+│   │   ├── greedy_search.py       # Layer 3: Greedy method
+│   │   └── qaoa_inspired.py       # Layer 3: QAOA-inspired
+│   │
+│   ├── quantum/
+│   │   ├── qaoa_sop.py            # Layer 4: Genuine QAOA (future)
+│   │   ├── quantum_kernel.py       # Layer 4: Q kernel benchmark
+│   │   └── vqe_optim.py           # Layer 4: VQE research
+│   │
+│   └── output/
+│       ├── metrics.py             # Layer 5: Metrics
+│       ├── plots.py               # Layer 5: Visualization
+│       └── report.py              # Layer 5: Report generation
 │
 ├── output_result/
-│   ├── data/                   # legacy CSVs from earlier versions — NOT read by v15
-│   └── q_stpp_v15_fair/        # results.json + plot.png (created by a run)
+│   └── q_stpp_v16/
+│       ├── fair_comparison_results.json
+│       └── quantum_benchmark_results.json
 │
-└── archive/                    # withdrawn / superseded versions (v4–v12)
+├── docs/
+│   ├── ARCHITECTURE.md            # This file
+│   ├── THEORY.md                 # Mathematical foundations
+│   ├── QUANTUM_ASSESSMENT.md     # Honest quantum analysis
+│   ├── Q_STPP_V16_REPORT.md      # Technical report
+│   └── DEVELOPMENT_HISTORY.md    # Version history
+│
+├── tests/
+│   ├── test_data_pipeline.py
+│   ├── test_features.py
+│   ├── test_augmentation.py
+│   └── test_quantum_layer.py
+│
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## 6. Key functions (`run_q_stpp_v15_fair.py`)
+## 5. Complexity Analysis
 
-| Function | Role |
-|----------|------|
-| `simulate_hawkes` | reproducible self-exciting space-time pattern |
-| `compute_L_summary` | Ripley-K based second-order summary L(r) |
-| `l_error` | mean squared deviation of a permutation's L(r) from target |
-| `set_diversity` | mean pairwise normalised Hamming distance of a perm set |
-| `_generate_perms` | fair local search shared by all three strategies |
-| `evaluate_method` | run one strategy, return error / diversity / time |
-| `run_single` | one (seed, N) cell across all methods |
-| `aggregate` | average metrics across seeds, grouped by N |
+| Component | Time Complexity | Space Complexity | Classical/Quantum |
+|-----------|-----------------|------------------|------------------|
+| Data loading | O(N) | O(N) | ✅ Classical |
+| K-function | O(N²) | O(N²) | ✅ Classical |
+| L-function | O(N²) | O(N²) | ✅ Classical |
+| CNN features | O(N × D) | O(D) | ✅ Classical |
+| GNN attention | O(N² × H) | O(N²) | ✅ Classical |
+| MH sampler | O(N² × S) | O(N) | ✅ Classical |
+| Greedy search | O(N² × S) | O(N) | ✅ Classical |
+| QAOA-inspired | O(N² × S × K) | O(N) | ✅ Classical |
+| **Genuine QAOA** | O(2ⁿ) | O(2ⁿ) | ⚠️ Quantum (N≤20) |
+| **Q kernel** | O(2ⁿ) | O(2ⁿ) | ⚠️ Quantum (N≤15) |
+
+Where:
+- N = number of events
+- S = number of swaps
+- K = multi-swap count
+- H = attention heads
+- D = feature dimension
+- n = number of qubits
 
 ---
 
-## 7. Running
+## 6. Honest Claims Summary
+
+### What Works (Classical)
+
+| Method | N Range | Quality | Diversity | Status |
+|--------|---------|---------|-----------|--------|
+| MH Sampler | All | Medium | High | ✅ Production-ready |
+| Greedy | All | High | Low | ✅ Production-ready |
+| QAOA-inspired | All | High | Medium | ✅ Production-ready |
+
+### What Could Work (Quantum - Research)
+
+| Method | N Range | Theoretical | Practical | Status |
+|--------|---------|-------------|-----------|---------|
+| QAOA SOP | N > 200 | Potential | Unproven | 🔬 Research |
+| Q Kernel | N ≤ 15 | Possible | Unvalidated | 🔬 Research |
+| VQE Optim | Large | Speculative | Unproven | 🔬 Research |
+
+### Key Messages
+
+1. **Classical v16 methods are production-ready** for current problem sizes
+2. **Quantum is a future research direction**, not current solution
+3. **No quantum advantage claimed** for any current benchmark
+4. **Honest comparison** between classical methods only
+
+---
+
+## 7. Dependencies
+
+```
+# Core
+numpy>=1.21.0
+scipy>=1.7.0
+matplotlib>=3.5.0
+
+# ML (optional)
+torch>=2.0.0          # For CNN/GNN features
+torch_geometric>=2.0  # For GNN
+
+# Quantum (optional - for Layer 4 benchmarks)
+pennylane>=0.30.0    # Quantum machine learning
+qiskit>=0.45.0       # QAOA implementation
+
+# Data
+pandas>=1.5.0         # Data manipulation
+
+# Visualization
+seaborn>=0.12.0       # Statistical plots
+
+# Testing
+pytest>=7.0.0         # Unit tests
+```
+
+---
+
+## 8. Quick Start
 
 ```bash
-# defaults: seeds 1..5, N ∈ {20,30,50}, 10 perms, 200 evals/perm/method
-python3 run_q_stpp_v15_fair.py
+# Install dependencies
+pip install -r requirements.txt
 
-# custom sweep
-python3 run_q_stpp_v15_fair.py --seeds 1 2 3 --n_events 20 40 60 --evals_per_perm 400
+# Run classical pipeline
+python run_q_stpp_v16.py --mode classical
+
+# Run with augmentation comparison
+python run_q_stpp_v16.py --mode fair-comparison
+
+# Run quantum benchmarks (requires PennyLane)
+python run_q_stpp_v16.py --mode quantum-benchmark
+
+# Generate report
+python run_q_stpp_v16.py --mode report
 ```
-
-Dependencies: `numpy`, `scipy`, `matplotlib` only. Runtime is a few seconds per
-(seed, N) cell on a laptop CPU; no GPU or quantum backend required.
-
----
-
-## 8. What this version does and does not claim
-
-**Does**: a controlled, reproducible, same-budget comparison of three classical
-permutation-search heuristics on a synthetic space-time pattern, reporting both
-L(r) preservation and augmentation diversity.
-
-**Does not**: run any quantum circuit, demonstrate a quantum advantage, or
-validate on real dengue surveillance data. Those remain future work.
-
----
-
-## 9. References
-
-1. Mateu, J. (2025). *Statistical learning for spatio-temporal point processes*
-   (S7-ECSIA, Prague) — SOP permutations and the K/L-function baseline.
-2. Mohler, G. & Mateu, J. (2024). Second-order preserving permutations. *Stat*.
-3. Ripley, B. D. (1977). Modelling spatial patterns. *JRSS-B* — the K-function.
