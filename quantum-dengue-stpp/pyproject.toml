@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantum-dengue-stpp"
+version = "1.0.0"
+description = "Quantum-Enhanced Dengue Spatio-Temporal Point Process Prediction"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "QC4SG 2026 Team"},
+]
+keywords = [
+    "quantum computing",
+    "dengue prediction",
+    "spatio-temporal point process",
+    "QAOA",
+    "PennyLane",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "pennylane>=0.38.0",
+    "numpy>=1.24.0,<2.0.0",
+    "scipy>=1.10.0,<2.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "matplotlib>=3.7.0,<4.0.0",
+    "seaborn>=0.12.0,<1.0.0",
+    "scikit-learn>=1.3.0,<2.0.0",
+    "networkx>=3.0,<4.0.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "pennylane-lightning[gpu] @ https://pennylaneai.github.io/Lightning-Wheels/pypi",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+]
+notebooks = [
+    "jupyter>=1.0.0",
+    "ipykernel>=6.0.0",
+    "nbformat>=5.0.0",
+]
+all = [
+    "pennylane-lightning[gpu] @ https://pennylaneai.github.io/Lightning-Wheels/pypi",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "jupyter>=1.0.0",
+    "ipykernel>=6.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/quantum-dengue-stpp"
+Documentation = "https://github.com/your-org/quantum-dengue-stpp#readme"
+Repository = "https://github.com/your-org/quantum-dengue-stpp"
+Issues = "https://github.com/your-org/quantum-dengue-stpp/issues"
+
+[project.scripts]
+quantum-dengue-run = "scripts.run_q_stpp_v17:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=src --cov-report=html"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

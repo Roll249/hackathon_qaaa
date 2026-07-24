@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+*.egg
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+.vs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Output (don't include results in container)
+output_result/
+
+# Logs
+*.log
+logs/
+
+# Data files (large CSVs, databases)
+*.csv
+*.sqlite
+*.db
+
+# Temporary files
+*.tmp
+.cache/

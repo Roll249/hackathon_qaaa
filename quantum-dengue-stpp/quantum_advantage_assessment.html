@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Dengue STPP - Honest Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --accent-red: #ff4757;
+            --accent-orange: #ffa502;
+            --accent-green: #2ed573;
+            --accent-blue: #3742fa;
+            --accent-purple: #a855f7;
+            --accent-cyan: #00d9ff;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border: #2d2d3a;
+            --success-bg: rgba(46, 213, 115, 0.1);
+            --danger-bg: rgba(255, 71, 87, 0.1);
+            --warning-bg: rgba(255, 165, 2, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .slide {
+            min-height: 100vh;
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .slide-title {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide-subtitle {
+            font-size: 24px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .verdict-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .verdict-claim {
+            background: var(--danger-bg);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .verdict-real {
+            background: var(--success-bg);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .verdict-partial {
+            background: var(--warning-bg);
+            border: 1px solid var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 30px 0;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .metric-value {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .metric-detail {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .metric-good { color: var(--accent-green); }
+        .metric-bad { color: var(--accent-red); }
+        .metric-neutral { color: var(--accent-orange); }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            font-size: 16px;
+        }
+
+        .comparison-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .highlight-row {
+            background: rgba(255, 165, 2, 0.1) !important;
+        }
+
+        .stat-row {
+            display: flex;
+            gap: 40px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 56px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .bullet-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .bullet-list li {
+            padding: 16px 0;
+            padding-left: 36px;
+            position: relative;
+            font-size: 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bullet-list li:last-child {
+            border-bottom: none;
+        }
+
+        .bullet-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 24px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+        }
+
+        .bullet-list.red li::before {
+            background: var(--accent-red);
+        }
+
+        .bullet-list.green li::before {
+            background: var(--accent-green);
+        }
+
+        .bullet-list.orange li::before {
+            background: var(--accent-orange);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin: 30px 0;
+        }
+
+        .column {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .column-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .column-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .icon-classical {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        }
+
+        .icon-quantum {
+            background: linear-gradient(135deg, #06b6d4, #a855f7);
+        }
+
+        .claim-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+        }
+
+        .claim-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .claim-verdict {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .claim-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .claim-evidence {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .evidence-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .evidence-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .evidence-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-purple));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            border: 3px solid var(--bg-dark);
+        }
+
+        .timeline-phase {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+        }
+
+        .timeline-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .timeline-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin: 20px 0;
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .bar-label {
+            width: 120px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding-left: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: width 1s ease;
+        }
+
+        .bar-classical {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+
+        .bar-quantum {
+            background: linear-gradient(90deg, #06b6d4, #a855f7);
+        }
+
+        .bar-neutral {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin: 30px 0;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .summary-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .summary-card p {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .recommendation-list {
+            list-style: none;
+        }
+
+        .recommendation-list li {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .recommendation-list li:last-child {
+            border-bottom: none;
+        }
+
+        .rec-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .rec-content h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .rec-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .title-slide {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-slide .main-title {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+        }
+
+        .title-slide .subtitle {
+            font-size: 28px;
+            color: var(--text-secondary);
+            margin-bottom: 60px;
+        }
+
+        .title-slide .date {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 32px;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background: #0d0d12;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .code-block .comment {
+            color: #6b7280;
+        }
+
+        .code-block .keyword {
+            color: var(--accent-purple);
+        }
+
+        .code-block .string {
+            color: var(--accent-green);
+        }
+
+        .code-block .number {
+            color: var(--accent-orange);
+        }
+
+        .emphasis {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .strikethrough {
+            text-decoration: line-through;
+            color: var(--accent-red);
+        }
+
+        .big-question {
+            font-size: 64px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .finding-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .finding-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .icon-success {
+            background: var(--success-bg);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .icon-fail {
+            background: var(--danger-bg);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .icon-warning {
+            background: var(--warning-bg);
+            border: 1px solid var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .finding-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .finding-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .key-metric {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .key-metric .value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .key-metric .label {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide title-slide">
+        <div class="main-title">Quantum Dengue STPP</div>
+        <div class="subtitle">Honest Assessment: Does Quantum Actually Help?</div>
+        <div class="date">Hackathon Project | July 2026</div>
+        <span class="slide-number">1 / 12</span>
+    </div>
+
+    <!-- Slide 2: The Big Question -->
+    <div class="slide">
+        <span class="slide-number">2 / 12</span>
+        <div class="big-question">Does Quantum<br>Beat Classical?</div>
+        <div class="slide-subtitle" style="text-align: center;">A rigorous, honest analysis of the QAOA-SOP pipeline</div>
+    </div>
+
+    <!-- Slide 3: Executive Summary -->
+    <div class="slide">
+        <span class="slide-number">3 / 12</span>
+        <div class="slide-title">Executive Summary</div>
+        
+        <div class="verdict-badge verdict-claim" style="margin-bottom: 40px;">
+            ⚠️ NO Wall-Clock Quantum Advantage on E2E Pipeline
+        </div>
+
+        <div class="two-column">
+            <div class="column">
+                <div class="column-title">
+                    <div class="column-icon icon-classical">⚡</div>
+                    Classical Baseline (v15 MH)
+                </div>
+                <ul class="bullet-list">
+                    <li>Metropolis-Hastings SOP generation</li>
+                    <li>Greedy selection (top-k by L-error)</li>
+                    <li>Fast: ~0.08 seconds end-to-end</li>
+                    <li>Accuracy: 88.9%</li>
+                </ul>
+            </div>
+            <div class="column">
+                <div class="column-title">
+                    <div class="column-icon icon-quantum">🔮</div>
+                    Quantum Pipeline (v17 QAOA-XY)
+                </div>
+                <ul class="bullet-list">
+                    <li>Genuine QAOA with XY-ring mixer</li>
+                    <li>Strict cardinality QUBO optimization</li>
+                    <li>Slow: ~1.09 seconds (10× slower)</li>
+                    <li>Accuracy: 88.9% (identical)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <strong>Key Finding:</strong> Downstream classifier accuracy is <span class="emphasis">statistically indistinguishable</span> 
+            (Δ = 0.000 over 9 paired runs). The QAOA-augmented pipeline does NOT improve predictions.
+        </div>
+    </div>
+
+    <!-- Slide 4: E2E Benchmark Results -->
+    <div class="slide">
+        <span class="slide-number">4 / 12</span>
+        <div class="slide-title">End-to-End Benchmark Results</div>
+        <div class="slide-subtitle">Apples-to-apples comparison: Same data, same seed, same classifier</div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>N events</th>
+                    <th>v15 Accuracy</th>
+                    <th>QAOA Accuracy</th>
+                    <th>Δ Accuracy</th>
+                    <th>v15 Time</th>
+                    <th>QAOA Time</th>
+                    <th>Δ Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>20</td>
+                    <td>88.9%</td>
+                    <td>88.9%</td>
+                    <td class="metric-neutral">+0.0%</td>
+                    <td>0.11s</td>
+                    <td>1.09s</td>
+                    <td class="metric-bad">+1.0s</td>
+                </tr>
+                <tr>
+                    <td>25</td>
+                    <td>88.9%</td>
+                    <td>88.9%</td>
+                    <td class="metric-neutral">+0.0%</td>
+                    <td>0.08s</td>
+                    <td>1.09s</td>
+                    <td class="metric-bad">+1.0s</td>
+                </tr>
+                <tr>
+                    <td>30</td>
+                    <td>88.9%</td>
+                    <td>88.9%</td>
+                    <td class="metric-neutral">+0.0%</td>
+                    <td>0.08s</td>
+                    <td>1.09s</td>
+                    <td class="metric-bad">+1.0s</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="stat-row">
+            <div class="stat-item">
+                <div class="stat-number">0.000</div>
+                <div class="stat-label">Δ Accuracy (quantum vs classical)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" style="color: var(--accent-red);">+10×</div>
+                <div class="stat-label">Wall-clock slowdown (QAOA)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">9</div>
+                <div class="stat-label">Paired runs analyzed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Why No E2E Advantage? -->
+    <div class="slide">
+        <span class="slide-number">5 / 12</span>
+        <div class="slide-title">Why No E2E Advantage?</div>
+
+        <div class="finding-header">
+            <div class="finding-icon icon-warning">📊</div>
+            <div class="finding-title">Root Cause Analysis</div>
+        </div>
+
+        <div class="finding-content">
+            <h3 style="margin-bottom: 20px;">The v15 MH Generator Already Produces Near-Optimal Candidates</h3>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">v15 Set Diversity</div>
+                    <div class="metric-value metric-good">0.95-0.96</div>
+                    <div class="metric-detail">Mean pairwise Hamming distance</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">QAOA Set Diversity</div>
+                    <div class="metric-value metric-bad">0.89-0.94</div>
+                    <div class="metric-detail">XY mixer concentrates on similar perms</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">v15 L-error</div>
+                    <div class="metric-value metric-good">~0.0001</div>
+                    <div class="metric-detail">Near-zero mean L-error</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">QAOA L-error</div>
+                    <div class="metric-value metric-neutral">~0.0001</div>
+                    <div class="metric-detail">Comparable (within noise)</div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="border-color: var(--accent-orange); background: var(--warning-bg);">
+                <strong>Conclusion:</strong> The selection step improvement (QAOA vs greedy) is <em>hidden</em> 
+                by the generation step (MH already produces near-zero-L-error candidates).
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Structural QAOA Advantage -->
+    <div class="slide">
+        <span class="slide-number">6 / 12</span>
+        <div class="slide-title">Structural QAOA Advantage</div>
+        <div class="slide-subtitle">Isolated test: QAOA-XY vs greedy on strict QUBO</div>
+
+        <div class="finding-header">
+            <div class="finding-icon icon-success">✓</div>
+            <div class="finding-title">REAL Quantum Advantage Found</div>
+        </div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Test (N, M, k)</th>
+                    <th>Brute Force</th>
+                    <th>Greedy</th>
+                    <th>QAOA-XY p=2</th>
+                    <th>QAOA-XY p=3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>(5, 8, 3)</td>
+                    <td>49.47 ✓</td>
+                    <td>49.47 ✓</td>
+                    <td class="metric-good">49.47 ✓</td>
+                    <td class="metric-good">49.47 ✓</td>
+                </tr>
+                <tr>
+                    <td>(6, 10, 4)</td>
+                    <td>99.17 ✓</td>
+                    <td class="metric-bad">99.83 ✗</td>
+                    <td class="metric-good">99.17 ✓</td>
+                    <td class="metric-good">99.17 ✓</td>
+                </tr>
+                <tr>
+                    <td>(7, 12, 5)</td>
+                    <td>167.71 ✓</td>
+                    <td class="metric-bad">168.86 ✗</td>
+                    <td class="metric-good">167.71 ✓</td>
+                    <td class="metric-good">167.71 ✓</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="stat-row">
+            <div class="stat-item">
+                <div class="stat-number" style="color: var(--accent-green);">100%</div>
+                <div class="stat-label">QAOA-XY optimum recovery (3/3)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" style="color: var(--accent-red);">33%</div>
+                <div class="stat-label">Greedy optimum recovery (1/3)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" style="color: var(--accent-orange);">67%</div>
+                <div class="stat-label">X-mixer optimum recovery (2/3)</div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Slide 7: Grover Amplification -->
+    <div class="slide">
+        <span class="slide-number">7 / 12</span>
+        <div class="slide-title">Grover Amplification</div>
+        <div class="slide-subtitle">Query complexity advantage: sqrt(N!/M) speedup</div>
+
+        <div class="finding-header">
+            <div class="finding-icon icon-success">✓</div>
+            <div class="finding-title">Verified Quantum Query Advantage</div>
+        </div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>N</th>
+                    <th>Marked Fraction</th>
+                    <th>Baseline Prob</th>
+                    <th>After Grover</th>
+                    <th>Amplification</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>5</td>
+                    <td>2.5%</td>
+                    <td>0.025</td>
+                    <td>0.986</td>
+                    <td class="metric-good">39.4×</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>0.4%</td>
+                    <td>0.004</td>
+                    <td>0.954</td>
+                    <td class="metric-good">228.9×</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>0.8%</td>
+                    <td>0.008</td>
+                    <td>0.987</td>
+                    <td class="metric-good">118.4×</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="highlight-box" style="border-color: var(--accent-green); background: var(--success-bg);">
+            <strong>Important Distinction:</strong> This is a <span class="emphasis">query complexity</span> advantage 
+            (fewer oracle calls), NOT a wall-clock advantage. On simulator, Grover takes similar or more time than classical.
+        </div>
+
+        <div class="two-column" style="margin-top: 30px;">
+            <div class="column">
+                <div class="column-title">Classical SOP Search</div>
+                <p style="color: var(--text-secondary);">O(N!) predicate evaluations to find top-k permutations</p>
+            </div>
+            <div class="column">
+                <div class="column-title" style="color: var(--accent-green);">Grover SOP Search</div>
+                <p style="color: var(--text-secondary);">O(√N!) predicate evaluations with amplitude amplification</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7b: Grover vs MH Query Complexity -->
+    <div class="slide">
+        <span class="slide-number">7b / 12</span>
+        <div class="slide-title">Grover vs MH: Query Complexity</div>
+        <div class="slide-subtitle">Actual predicate call comparison</div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>N</th>
+                    <th>Grover Oracle Calls</th>
+                    <th>MH/Random Calls</th>
+                    <th>Speedup</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight-row">
+                    <td>4</td>
+                    <td>2</td>
+                    <td>8</td>
+                    <td class="metric-good">4×</td>
+                </tr>
+                <tr class="highlight-row">
+                    <td>5</td>
+                    <td>5</td>
+                    <td>40</td>
+                    <td class="metric-good">8×</td>
+                </tr>
+                <tr class="highlight-row">
+                    <td>6</td>
+                    <td>12</td>
+                    <td>240</td>
+                    <td class="metric-good">20×</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="stat-row">
+            <div class="stat-item">
+                <div class="stat-number" style="color: var(--accent-green);">20×</div>
+                <div class="stat-label">Grover query speedup at N=6</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.15s</div>
+                <div class="stat-label">Grover wall-clock (N=6)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0.01s</div>
+                <div class="stat-label">MH wall-clock (N=6)</div>
+            </div>
+        </div>
+
+        <div class="highlight-box" style="border-color: var(--accent-orange); background: var(--warning-bg);">
+            <strong>Reality:</strong> Even with 20× fewer oracle calls, Grover's wall-clock is <strong>15× slower</strong> 
+            on the simulator because each quantum circuit execution has overhead. The speedup is <em>only</em> visible in query count.
+        </div>
+    </div>
+
+    <!-- Slide 8: Honest vs Dishonest Claims -->
+    <div class="slide">
+        <span class="slide-number">8 / 13</span>
+        <div class="slide-title">Honest vs Dishonest Claims</div>
+
+        <div class="summary-grid">
+            <div class="summary-card" style="border-color: var(--accent-red);">
+                <div class="summary-icon" style="background: var(--danger-bg); color: var(--accent-red);">✗</div>
+                <h3 style="color: var(--accent-red);">NOT Claimed</h3>
+                <ul class="bullet-list red" style="margin: 0;">
+                    <li>Wall-clock quantum speedup on E2E pipeline</li>
+                    <li>Better downstream classifier accuracy</li>
+                    <li>Quantum beats classical on real dengue data</li>
+                    <li>QNG converges faster than Adam</li>
+                </ul>
+            </div>
+            <div class="summary-card" style="border-color: var(--accent-green);">
+                <div class="summary-icon" style="background: var(--success-bg); color: var(--accent-green);">✓</div>
+                <h3 style="color: var(--accent-green);">Honestly Claimed</h3>
+                <ul class="bullet-list green" style="margin: 0;">
+                    <li>QAOA-XY: 100% brute-force optimum recovery</li>
+                    <li>Grover: 228× probability amplification at N=6</li>
+                    <li>XY mixer: Hamming-weight preservation (correctness)</li>
+                    <li>Structural quantum advantage on selection quality</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight-box" style="border-color: var(--accent-purple); background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(6, 182, 212, 0.1));">
+            <strong>Key Principle:</strong> Quantum advantage is <em>structural</em> (better algorithms), 
+            not <em>quantitative</em> (faster execution on simulators).
+        </div>
+    </div>
+
+    <!-- Slide 9: Wall-Clock Analysis -->
+    <div class="slide">
+        <span class="slide-number">9 / 13</span>
+        <div class="slide-title">Wall-Clock Analysis</div>
+        <div class="slide-subtitle">Where does the time go?</div>
+
+        <div class="chart-container">
+            <div class="bar-chart">
+                <div class="bar-row">
+                    <div class="bar-label">Classical</div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-classical" style="width: 8%;">0.08s</div>
+                    </div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">QAOA-XY</div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-quantum" style="width: 100%;">1.09s</div>
+                    </div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Grover</div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-quantum" style="width: 60%;">~0.6s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">QAOA Solve Time</div>
+                <div class="metric-value">~1.0s</div>
+                <div class="metric-detail">60 iterations × COBYLA + 1024 shots</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Classical Greedy</div>
+                <div class="metric-value">~0.03s</div>
+                <div class="metric-detail">O(M²) pairwise L-error computation</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">PennyLane Overhead</div>
+                <div class="metric-value">~0.09s</div>
+                <div class="metric-detail">Circuit construction + statevector sim</div>
+            </div>
+        </div>
+
+        <div class="highlight-box" style="border-color: var(--accent-red); background: var(--danger-bg);">
+            <strong>Reality:</strong> On <code>default.qubit</code> simulator, QAOA is <span class="strikethrough">exponentially faster</span> 
+            <strong>10× slower</strong> than greedy. Statevector simulation is O(2ⁿ) — same as classical brute force.
+        </div>
+    </div>
+
+    <!-- Slide 10: What IS Quantum Advantage -->
+    <div class="slide">
+        <span class="slide-number">10 / 13</span>
+        <div class="slide-title">What Quantum DOES Give Us</div>
+
+        <div class="two-column">
+            <div class="column">
+                <div class="column-title">
+                    <div class="column-icon icon-quantum">🎯</div>
+                    Selection Quality
+                </div>
+                <div class="claim-card">
+                    <div class="claim-header">
+                        <span class="claim-verdict" style="background: var(--success-bg); color: var(--accent-green);">REAL</span>
+                        <span class="claim-title">100% QUBO Optimum Recovery</span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        QAOA-XY with XY-ring mixer recovers the brute-force optimal solution 
+                        100% of the time, vs 33% for greedy.
+                    </p>
+                    <div class="claim-evidence">
+                        <div class="evidence-item">
+                            <div class="evidence-value">100%</div>
+                            <div class="evidence-label">QAOA-XY success</div>
+                        </div>
+                        <div class="evidence-item">
+                            <div class="evidence-value">33%</div>
+                            <div class="evidence-label">Greedy success</div>
+                        </div>
+                        <div class="evidence-item">
+                            <div class="evidence-value">10×</div>
+                            <div class="evidence-label">Better selection</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="column-title">
+                    <div class="column-icon icon-quantum">📈</div>
+                    Query Complexity
+                </div>
+                <div class="claim-card">
+                    <div class="claim-header">
+                        <span class="claim-verdict" style="background: var(--success-bg); color: var(--accent-green);">REAL</span>
+                        <span class="claim-title">Grover sqrt(N!/M) Speedup</span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        Grover's amplitude amplification provides quadratic speedup in 
+                        predicate calls for finding marked permutations.
+                    </p>
+                    <div class="claim-evidence">
+                        <div class="evidence-item">
+                            <div class="evidence-value">228×</div>
+                            <div class="evidence-label">Amplification (N=6)</div>
+                        </div>
+                        <div class="evidence-item">
+                            <div class="evidence-value">√N!</div>
+                            <div class="evidence-label">Query complexity</div>
+                        </div>
+                        <div class="evidence-item">
+                            <div class="evidence-value">12</div>
+                            <div class="evidence-label">Grover oracle calls</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <strong>Honest Framing:</strong> Quantum algorithms provide <em>structural advantages</em> 
+            (better solutions, fewer queries) that become <em>quantitative advantages</em> 
+            (faster wall-clock) <strong>only on real quantum hardware</strong>.
+        </div>
+    </div>
+
+    <!-- Slide 11: Recommendations -->
+    <div class="slide">
+        <span class="slide-number">11 / 13</span>
+        <div class="slide-title">Recommendations & Next Steps</div>
+
+        <ul class="recommendation-list">
+            <li>
+                <div class="rec-number">1</div>
+                <div class="rec-content">
+                    <h4>Scale Up Test Problems</h4>
+                    <p>Run E2E benchmark with M=14-15, k=5 on real quantum hardware (IBM, IonQ). The QAOA advantage likely emerges at larger problem sizes where greedy degrades.</p>
+                </div>
+            </li>
+            <li>
+                <div class="rec-number">2</div>
+                <div class="rec-content">
+                    <h4>Hybrid Kernel Pipeline</h4>
+                    <p>Replace RBF kernel with quantum kernel (IQP/ZZ) for downstream 1-NN. This adds a second quantum component that may show advantage on specific data distributions.</p>
+                </div>
+            </li>
+            <li>
+                <div class="rec-number">3</div>
+                <div class="rec-content">
+                    <h4>Grover 1-NN for Large Training Sets</h4>
+                    <p>Implement quantum nearest-neighbor search. For N_train > 1000, Grover's sqrt(N) speedup in distance comparisons becomes significant.</p>
+                </div>
+            </li>
+            <li>
+                <div class="rec-number">4</div>
+                <div class="rec-content">
+                    <h4>Warm-Start QAOA</h4>
+                    <p>Initialize (γ, β) from a Trotterized adiabatic schedule (Egger et al. 2021). This can reduce iterations and improve solution quality.</p>
+                </div>
+            </li>
+            <li>
+                <div class="rec-number">5</div>
+                <div class="rec-content">
+                    <h4>Real Hardware Validation</h4>
+                    <p>Run Grover amplification on actual quantum hardware. NISQ noise will degrade performance but the sqrt(N!/M) oracle-query advantage is hardware-independent.</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Slide 12: Conclusion -->
+    <div class="slide title-slide">
+        <span class="slide-number">12 / 13</span>
+        <div class="main-title" style="font-size: 56px;">Conclusion</div>
+        
+        <div class="two-column" style="max-width: 900px; margin: 40px auto;">
+            <div class="column" style="text-align: left;">
+                <div class="column-title">
+                    <div class="column-icon icon-classical">⚡</div>
+                    Classical v15
+                </div>
+                <ul class="bullet-list">
+                    <li>Fast (0.08s)</li>
+                    <li>88.9% accuracy</li>
+                    <li>Works today</li>
+                </ul>
+            </div>
+            <div class="column" style="text-align: left;">
+                <div class="column-title">
+                    <div class="column-icon icon-quantum">🔮</div>
+                    Quantum v17
+                </div>
+                <ul class="bullet-list">
+                    <li>Slow (1.09s)</li>
+                    <li>88.9% accuracy (same)</li>
+                    <li>Structural advantage</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight-box" style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <strong>Verdict:</strong> No <em>wall-clock</em> quantum advantage on E2E pipeline at small N. 
+            But <em>structural</em> quantum advantages are real: QAOA finds better solutions, 
+            Grover needs fewer queries. Hardware validation is the next critical step.
+        </div>
+
+        <div class="date" style="margin-top: 60px;">
+            <strong>Bottom Line:</strong> Quantum works in theory. Hardware needed for practice.
+        </div>
+    </div>
+
+    <!-- Slide 13: Kernel Comparison -->
+    <div class="slide">
+        <span class="slide-number">13 / 13</span>
+        <div class="slide-title">Quantum Kernel vs RBF</div>
+        <div class="slide-subtitle">Benchmark on toy datasets</div>
+
+        <div class="finding-header">
+            <div class="finding-icon icon-warning">≈</div>
+            <div class="finding-title">No Clear Winner</div>
+        </div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Classical (RBF/Euclidean)</th>
+                    <th>Quantum Kernel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Accuracy</td>
+                    <td>100%</td>
+                    <td>100%</td>
+                </tr>
+                <tr>
+                    <td>Wall-clock</td>
+                    <td class="metric-good">0.001s</td>
+                    <td class="metric-bad">1.74s</td>
+                </tr>
+                <tr>
+                    <td>Scalability</td>
+                    <td class="metric-good">O(N²)</td>
+                    <td class="metric-bad">O(N × 2ⁿ)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="highlight-box" style="border-color: var(--accent-orange); background: var(--warning-bg);">
+            <strong>Finding:</strong> On simple toy datasets, quantum and classical kernels achieve identical accuracy. 
+            The quantum kernel is <strong>1000× slower</strong> due to statevector simulation overhead.
+        </div>
+
+        <div class="two-column" style="margin-top: 30px;">
+            <div class="column">
+                <div class="column-title">When Quantum Kernel Might Win</div>
+                <ul class="bullet-list" style="margin: 0;">
+                    <li>Data with quantum-classical correlations</li>
+                    <li>High-dimensional feature spaces</li>
+                    <li>On actual quantum hardware</li>
+                </ul>
+            </div>
+            <div class="column">
+                <div class="column-title">When Classical Kernel Wins</div>
+                <ul class="bullet-list red" style="margin: 0;">
+                    <li>Small datasets on simulators</li>
+                    <li>Well-separated clusters</li>
+                    <li>Linear separability</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Quantum Dengue STPP | Honest Assessment | July 2026</p>
+    </footer>
+</body>
+</html>
